@@ -274,14 +274,16 @@ const Quartos = () => {
                 Salvar e Encerrar
               </button>
 
-              {!confirmandoExclusao ? (
-                <button onClick={confirmarExclusao} style={{ backgroundColor: 'red' }}>Excluir</button>
-              ) : (
-                <>
-                  <button onClick={() => excluirFuncionario(quartoAberto._id)} style={{ backgroundColor: 'red' }}>TEM CERTEZA? SIM</button>
-                  <button onClick={() => setConfirmandoExclusao(false)}>NÃO</button>
-                </>
-              )}
+                    {confirmandoExclusao && (
+                  <div className="modal-overlayQUARTOS" onClick={() => setConfirmandoExclusao(false)}>
+                    <div className="modal-comandaQUARTOS" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                      <h3>Deseja realmente excluir este quarto?</h3>
+                      <button style={{ backgroundColor: 'red', color: 'white' }} onClick={() => excluirFuncionario(quartoAberto._id)}>Sim</button>
+                      <button onClick={() => setConfirmandoExclusao(false)}>Não</button>
+                    </div>
+                  </div>
+                )}
+                <button onClick={() => setConfirmandoExclusao(true)} style={{ backgroundColor: 'red' }}>Excluir</button>
 
               <button className="fechar-btnQUARTOS" onClick={fecharQuarto}>X</button>
 

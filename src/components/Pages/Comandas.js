@@ -13,6 +13,8 @@ const Comandas = () => {
   const [criando, setCriando] = useState(false);
   const [numeroComanda, setNumeroComanda] = useState('');
   const [produtos, setProdutos] = useState([]);
+  const [modalExcluir, setModalExcluir] = useState(false);
+
 
   useEffect(() => {
     carregarComandas();
@@ -233,21 +235,27 @@ const exportarPDF = () => {
     salvarComandaNoBanco(comAtualizada);
   };
 
-  const excluirComanda = async () => {
-    if (!comandaAberta) return;
+  const confirmarExclusaoComanda = () => {
+  setModalExcluir(true);
+};
 
-    try {
-      await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${comandaAberta._id}`, {
-        method: 'DELETE'
-      });
+const excluirComandaConfirmada = async () => {
+  if (!comandaAberta) return;
 
-      const atualizadas = comandas.filter(c => c._id !== comandaAberta._id);
-      setComandas(atualizadas);
-      fecharComanda();
-    } catch (err) {
-      console.error('Erro ao excluir comanda:', err);
-    }
-  };
+  try {
+    await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${comandaAberta._id}`, {
+      method: 'DELETE'
+    });
+
+    const atualizadas = comandas.filter(c => c._id !== comandaAberta._id);
+    setComandas(atualizadas);
+    fecharComanda();
+    setModalExcluir(false);
+  } catch (err) {
+    console.error('Erro ao excluir comanda:', err);
+  }
+};
+
 
   return (
     <div className="home-container">
@@ -358,7 +366,7 @@ const exportarPDF = () => {
             <div className="botoes-comanda">
               <button onClick={adicionar10PorCento}>10%</button>
               <button onClick={exportarPDF}>Imprimir</button>
-              <button className="excluir" onClick={excluirComanda}>Excluir</button>
+              <button className="excluir" onClick={confirmarExclusaoComanda}>Excluir</button>
               <button className="encerrar-btn" onClick={salvarEEncerrar}>Salvar e Encerrar</button>
               <button className="fechar-btn" onClick={fecharComanda}>X</button>
 
@@ -395,6 +403,16 @@ const exportarPDF = () => {
           </div>
         </div>
       )}
+            {modalExcluir && (
+            <div className="modal-overlay" onClick={() => setModalExcluir(false)}>
+              <div className="modal-comanda" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                <h3>Deseja realmente excluir esta comanda?</h3>
+                <button className="encerrar-btn" onClick={excluirComandaConfirmada}>Sim</button>
+                <button className="fechar-btn" onClick={() => setModalExcluir(false)}>Não</button>
+              </div>
+            </div>
+          )}
+
     </div>
   );
 };
