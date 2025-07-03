@@ -20,7 +20,7 @@ const Quartos = () => {
 
   const carregarFuncionarias = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/quartos/${userId}`);
+      const res = await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${userId}`);
       const data = await res.json();
       setFuncionarias(data);
     } catch (err) {
@@ -31,7 +31,7 @@ const Quartos = () => {
   const adicionarFuncionario = async () => {
     if (novaNome.trim() === '') return;
     try {
-      const res = await fetch('http://localhost:5000/api/quartos', {
+      const res = await fetch('https://luizaclubbackend.onrender.com/api/quartos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -52,7 +52,7 @@ const Quartos = () => {
 
   const excluirFuncionario = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/quartos/${id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${id}`, {
         method: 'DELETE',
       });
       setFuncionarias(funcionarias.filter((f) => f._id !== id));
@@ -78,7 +78,7 @@ const Quartos = () => {
 
   const salvarAlteracoes = async () => {
     try {
-      await fetch(`http://localhost:5000/api/quartos/${quartoAberto._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${quartoAberto._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +94,7 @@ const Quartos = () => {
 
   const encerrarQuarto = async () => {
     try {
-      await fetch('http://localhost:5000/api/finalizados', {
+      await fetch('https://luizaclubbackend.onrender.com/api/finalizados', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -107,7 +107,7 @@ const Quartos = () => {
         }),
       });
 
-      await fetch(`http://localhost:5000/api/quartos/${quartoAberto._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${quartoAberto._id}`, {
         method: 'DELETE',
       });
 
@@ -148,7 +148,7 @@ const Quartos = () => {
     setValorTotal(novoTotal);
 
     try {
-      await fetch(`http://localhost:5000/api/quartos/${quartoAberto._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${quartoAberto._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

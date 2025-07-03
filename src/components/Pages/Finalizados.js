@@ -11,7 +11,7 @@ const Finalizados = () => {
     const carregarComandasFinalizadas = async () => {
       try {
         const userId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:5000/api/comandas/${userId}`);
+        const res = await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${userId}`);
         const data = await res.json();
         const filtradas = data
           .filter(c => c.status === 'finalizada')
@@ -25,7 +25,7 @@ const Finalizados = () => {
     const carregarQuartosFinalizados = async () => {
       try {
         const userId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:5000/api/finalizados/${userId}`);
+        const res = await fetch(`https://luizaclubbackend.onrender.com/api/finalizados/${userId}`);
         const data = await res.json();
         const comTipo = data.map(q => ({ ...q, tipo: 'quarto' }));
         setFinalizados(comTipo);

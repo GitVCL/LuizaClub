@@ -22,7 +22,7 @@ const Comandas = () => {
   const carregarComandas = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const res = await fetch(`http://localhost:5000/api/comandas/${userId}`);
+      const res = await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${userId}`);
       const data = await res.json();
       setComandas(data.filter(c => c.status !== 'finalizada'));
     } catch (err) {
@@ -32,7 +32,7 @@ const Comandas = () => {
 
   const carregarProdutos = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/produtos`);
+      const res = await fetch(`https://luizaclubbackend.onrender.com/api/produtos`);
       const data = await res.json();
       setProdutos(data);
     } catch (err) {
@@ -53,7 +53,7 @@ const Comandas = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/comandas', {
+      const res = await fetch('https://luizaclubbackend.onrender.com/api/comandas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nova),
@@ -82,7 +82,7 @@ const Comandas = () => {
 
   const salvarComandaNoBanco = async (comanda) => {
     try {
-      await fetch(`http://localhost:5000/api/comandas/${comanda._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${comanda._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comanda),
@@ -106,7 +106,7 @@ const Comandas = () => {
     };
 
     try {
-      await fetch(`http://localhost:5000/api/comandas/${comFinalizada._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${comFinalizada._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comFinalizada)
@@ -237,7 +237,7 @@ const exportarPDF = () => {
     if (!comandaAberta) return;
 
     try {
-      await fetch(`http://localhost:5000/api/comandas/${comandaAberta._id}`, {
+      await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${comandaAberta._id}`, {
         method: 'DELETE'
       });
 
