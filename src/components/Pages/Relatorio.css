@@ -1,7 +1,7 @@
-.home-container {
+.home-containerRELATORIO {
   display: flex;
   height: 100vh;
-  background-image: url('imag.png');
+  background-color: black;
   background-size: cover;
   background-position: center;
   color: white;
@@ -36,7 +36,7 @@
 .RELATORIO-container {
   display: flex;
   height: 100vh;
-  background-image: url('imag.png');
+  background-color: black;
   background-size: cover;
   background-position: center;
   color: white;

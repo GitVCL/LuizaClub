@@ -270,6 +270,7 @@ const excluirComandaConfirmada = async () => {
 
       <div className="home-content">
         <div className="comandas-header">
+          <h1></h1>
           {!criando ? (
             <button onClick={() => setCriando(true)}>+ Nova Comanda</button>
           ) : (

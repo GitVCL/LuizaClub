@@ -106,7 +106,8 @@ function Relatorio() {
         <button onClick={() => navigate('/')}>Logout</button>
       </div>
 
-      <div className="RELATORIO-content">
+        
+        <div className="RELATORIO-content">
         <h2 className="RELATORIO-titulo">Relatórios do Sistema</h2>
 
         <div className="RELATORIO-totais">
