@@ -21,7 +21,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('https://luizaclubbackend.onrender.com/api/auth/register/send-code', {
+      const response = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/register/send-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

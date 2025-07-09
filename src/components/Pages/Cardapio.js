@@ -12,7 +12,7 @@ function Cardapio() {
     variantes: ''
   });
 
-  const API_URL = 'https://luizaclubbackend.onrender.com/api/produtos';
+  const API_URL = 'https://luizaclubbackend-production.up.railway.app/api/produtos';
 
   // Buscar produtos do banco ao carregar
   useEffect(() => {

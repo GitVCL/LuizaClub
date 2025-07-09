@@ -10,7 +10,7 @@ const LoginCodeRequest = () => {
 
   const solicitarCodigo = async () => {
     try {
-      const res = await fetch('https://luizaclubbackend.onrender.com/api/auth/login/send-code', {
+      const res = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

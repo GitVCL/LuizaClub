@@ -24,14 +24,14 @@ function Relatorio() {
   useEffect(() => {
   const fetchData = async () => {
     try {
-      const resComandas = await fetch(`https://luizaclubbackend.onrender.com/api/comandas/${userId}`);
+      const resComandas = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
       const dadosComandas = await resComandas.json();
 
-      const resFinalizados = await fetch(`https://luizaclubbackend.onrender.com/api/finalizados/${userId}`);
+      const resFinalizados = await fetch(`https://luizaclubbackend-production.up.railway.app/api/finalizados/${userId}`);
       const dadosFinalizados = await resFinalizados.json();
       const dadosQuartosFinalizados = dadosFinalizados.filter(q => q.tipo === 'quarto');
 
-      const resQuartosAbertos = await fetch(`https://luizaclubbackend.onrender.com/api/quartos/${userId}`);
+      const resQuartosAbertos = await fetch(`https://luizaclubbackend-production.up.railway.app/api/quartos/${userId}`);
       const dadosQuartosAbertos = await resQuartosAbertos.json();
 
       const quartosAbertosComData = dadosQuartosAbertos.map(q => ({

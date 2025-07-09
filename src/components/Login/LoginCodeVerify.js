@@ -17,7 +17,7 @@ const LoginCodeVerify = () => {
     setMensagem('');
 
     try {
-      const res = await fetch('https://luizaclubbackend.onrender.com/api/auth/login/verify-code', {
+      const res = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: codigo })

@@ -13,7 +13,7 @@ const Login = () => {
     setLoading(true); // <- ativa o loading
 
     try {
-      const response = await fetch('https://luizaclubbackend.onrender.com/api/auth/login', {
+      const response = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -22,7 +22,7 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        await fetch('https://luizaclubbackend.onrender.com/api/auth/login/send-code', {
+        await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login/send-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
