@@ -13,8 +13,8 @@ function Cardapio() {
   });
 
   const API_URL = 'https://luizaclubbackend-production.up.railway.app/api/produtos';
+  const userId = localStorage.getItem('userId');
 
-  // Buscar produtos do banco ao carregar
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
@@ -34,15 +34,23 @@ function Cardapio() {
   };
 
   const handleAdicionarItem = async () => {
-    if (!novoItem.nome || !novoItem.valor || !novoItem.unidades) return;
+    const nome = novoItem.nome.trim();
+    const valor = parseFloat(novoItem.valor);
+    const unidades = parseInt(novoItem.unidades);
+
+    if (!nome || isNaN(valor) || isNaN(unidades)) {
+      alert('Preencha todos os campos corretamente.');
+      return;
+    }
 
     const novo = {
-      nome: novoItem.nome,
-      valor: parseFloat(novoItem.valor),
-      unidades: parseInt(novoItem.unidades),
+      nome,
+      valor,
+      unidades,
       variantes: novoItem.variantes
         ? novoItem.variantes.split(',').map((v) => v.trim())
-        : []
+        : [],
+      userId
     };
 
     try {
@@ -53,10 +61,12 @@ function Cardapio() {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         setItens([data, ...itens]);
         setNovoItem({ nome: '', valor: '', unidades: '', variantes: '' });
       } else {
+        console.error('Erro ao salvar:', data);
         alert('Erro ao adicionar produto.');
       }
     } catch (err) {
@@ -65,16 +75,13 @@ function Cardapio() {
   };
 
   const handleExcluirItem = async (id) => {
-    const confirmacao = window.confirm('Você tem certeza que deseja excluir este item?');
-    if (!confirmacao) return;
+    if (!window.confirm('Você tem certeza que deseja excluir este item?')) return;
 
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
 
       if (res.ok) {
-        setItens(itens.filter((item) => item._id !== id));
+        setItens(itens.filter((item) => item.id !== id));
       } else {
         alert('Erro ao excluir item.');
       }
@@ -85,9 +92,8 @@ function Cardapio() {
 
   return (
     <div className="CARDAPIO-container">
-          <div className="sidebar">
+      <div className="sidebar">
         <button onClick={() => navigate('/comandas')}>Comandas</button>
-        <button onClick={() => navigate('/quartos')}>Quartos</button>
         <button onClick={() => navigate('/cardapio')}>Cardápio</button>
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
@@ -133,7 +139,7 @@ function Cardapio() {
 
         <div className="CARDAPIO-scroll">
           {itens.map((item) => (
-            <div key={item._id} className="CARDAPIO-item-card">
+            <div key={item.id} className="CARDAPIO-item-card">
               <h3>{item.nome}</h3>
               <p>Valor: R$ {item.valor}</p>
               <p>Unidades: {item.unidades}</p>
@@ -149,7 +155,7 @@ function Cardapio() {
               )}
               <button
                 className="CARDAPIO-excluir-btn"
-                onClick={() => handleExcluirItem(item._id)}
+                onClick={() => handleExcluirItem(item.id)}
               >
                 🗑️ Excluir
               </button>

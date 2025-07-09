@@ -84,7 +84,7 @@ const Comandas = () => {
 
   const salvarComandaNoBanco = async (comanda) => {
     try {
-      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comanda._id}`, {
+      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comanda.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comanda),
@@ -108,13 +108,13 @@ const Comandas = () => {
     };
 
     try {
-      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comFinalizada._id}`, {
+      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comFinalizada.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comFinalizada)
       });
 
-      const atualizadas = comandas.filter(c => c._id !== comFinalizada._id);
+      const atualizadas = comandas.filter(c => c.id !== comFinalizada.id);
       setComandas(atualizadas);
       fecharComanda();
     } catch (err) {
@@ -146,7 +146,7 @@ const Comandas = () => {
 
     const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
     setComandaAberta(comAtualizada);
-    setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+    setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
     salvarComandaNoBanco(comAtualizada);
   };
 
@@ -158,7 +158,7 @@ const Comandas = () => {
     setValorTotal(novoTotal);
     const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
     setComandaAberta(comAtualizada);
-    setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+    setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
     salvarComandaNoBanco(comAtualizada);
   };
 
@@ -171,7 +171,7 @@ const Comandas = () => {
       setValorTotal(novoTotal);
       const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
       setComandaAberta(comAtualizada);
-      setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+      setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
       salvarComandaNoBanco(comAtualizada);
     } else {
       removerItem(idx);
@@ -186,7 +186,7 @@ const Comandas = () => {
     setValorTotal(novoTotal);
     const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
     setComandaAberta(comAtualizada);
-    setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+    setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
     salvarComandaNoBanco(comAtualizada);
   };
 
@@ -204,7 +204,7 @@ const Comandas = () => {
 
   const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
   setComandaAberta(comAtualizada);
-  setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+  setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
   salvarComandaNoBanco(comAtualizada);
 };
 
@@ -231,7 +231,7 @@ const exportarPDF = () => {
     setDono(novoNome);
     const comAtualizada = { ...comandaAberta, dono: novoNome };
     setComandaAberta(comAtualizada);
-    setComandas(comandas.map(c => c._id === comAtualizada._id ? comAtualizada : c));
+    setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
     salvarComandaNoBanco(comAtualizada);
   };
 
@@ -243,11 +243,11 @@ const excluirComandaConfirmada = async () => {
   if (!comandaAberta) return;
 
   try {
-    await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comandaAberta._id}`, {
+    await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comandaAberta.id}`, {
       method: 'DELETE'
     });
 
-    const atualizadas = comandas.filter(c => c._id !== comandaAberta._id);
+    const atualizadas = comandas.filter(c => c.id !== comandaAberta.id);
     setComandas(atualizadas);
     fecharComanda();
     setModalExcluir(false);
@@ -258,10 +258,9 @@ const excluirComandaConfirmada = async () => {
 
 
   return (
-    <div className="home-container">
+    <div className="home-containerCOMANDAS">
           <div className="sidebar">
         <button onClick={() => navigate('/comandas')}>Comandas</button>
-        <button onClick={() => navigate('/quartos')}>Quartos</button>
         <button onClick={() => navigate('/cardapio')}>Cardápio</button>
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
@@ -295,7 +294,7 @@ const excluirComandaConfirmada = async () => {
 
         <div className="comandas-grid">
           {comandas.map((c) => (
-            <div key={c._id} className="comanda-card">
+            <div key={c.id} className="comanda-card">
               <h3>{c.nome}</h3>
               <p>Total: R$ {c.total.toFixed(2)}</p>
               <p>Dono: {c.dono || '---'}</p>
@@ -315,7 +314,7 @@ const excluirComandaConfirmada = async () => {
               <select onChange={(e) => adicionarItem(JSON.parse(e.target.value))}>
                 <option value="">Selecione</option>
                 {produtos.map((p) => (
-                  <option key={p._id} value={JSON.stringify(p)}>
+                  <option key={p.id} value={JSON.stringify(p)}>
                     {p.nome} - R$ {p.valor}
                   </option>
                 ))}

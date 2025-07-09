@@ -11,7 +11,6 @@ import RegisterCodeVerify from './components/Login/RegisterCodeVerify.js';
 import Comandas from './components/Pages/Comandas.js';
 import Cardapio from './components/Pages/Cardapio.js'
 import Relatorio from './components/Pages/Relatorio.js'
-import Quartos from './components/Pages/Quartos.js'
 import Finalizados from './components/Pages/Finalizados.js';
 
 
@@ -45,9 +44,6 @@ function App() {
 
                 {/* Rota para a Comandas */}
           <Route path="/comandas" element={<Comandas metas={metas} />} />
-
-               {/* Rota para a Quartos */}
-          <Route path="/quartos" element={<Quartos metas={metas} />} />
           
                {/* Rota para Cardapio */}
           <Route path="/cardapio" element={<Cardapio />} />

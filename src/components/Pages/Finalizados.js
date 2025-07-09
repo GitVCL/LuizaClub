@@ -43,10 +43,10 @@ const Finalizados = () => {
   });
 
   return (
-    <div className="home-container">
+    <div className="home-containerCOMANDAS">
       <div className="sidebar">
         <button onClick={() => navigate('/comandas')}>Comandas</button>
-        <button onClick={() => navigate('/quartos')}>Quartos</button>
+        
         <button onClick={() => navigate('/cardapio')}>Cardápio</button>
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
@@ -62,7 +62,7 @@ const Finalizados = () => {
             <p>Nenhum item finalizado encontrado.</p>
           ) : (
             todosItens.map((item) => (
-              <div key={item._id} className="comanda-card">
+              <div key={item.id} className="comanda-card">
                 <h3>{item.nome}</h3>
                 <p>Total: R$ {item.total.toFixed(2)}</p>
                 {item.dono && <p>Dono: {item.dono}</p>}

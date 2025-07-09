@@ -5,40 +5,34 @@ import './Login.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // <- ADICIONADO
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // <- ativa o loading
+    setLoading(true);
 
     try {
       const response = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, senha: password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/login/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-
-        localStorage.setItem('tempEmail', email);
-        alert('✅ Verifique seu e-mail e insira o código.');
-        navigate('/LoginCodeVerify');
+        localStorage.setItem('userId', data.userId);
+        alert('✅ Login realizado com sucesso!');
+        navigate('/comandas');
       } else {
-        alert(`❌ Erro: ${data.message}`);
+        alert(`❌ Erro: ${data.message || 'Falha no login.'}`);
       }
     } catch (error) {
       console.error('Erro ao logar:', error);
       alert('❌ Erro de conexão com o servidor.');
     } finally {
-      setLoading(false); // <- desativa o loading
+      setLoading(false);
     }
   };
 
@@ -60,14 +54,13 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
         <button type="submit" disabled={loading}>
           {loading ? <span className="spinner" /> : 'Entrar'}
         </button>
 
         <div className="extra-options">
           <a href="/register">Criar Conta</a>
-          <a href="#">Esqueceu a Senha ?</a>
+          <a href="#">Esqueceu a Senha?</a>
         </div>
       </form>
     </div>
