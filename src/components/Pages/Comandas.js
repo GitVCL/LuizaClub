@@ -193,7 +193,7 @@ const Comandas = () => {
   const adicionar10PorCento = () => {
   const taxa = valorTotal * 0.10;
   const novosItens = [...itens, {
-    descricao: '10%',
+    descricao: 'Taxa do Garçom',
     qtd: 1,
     valorUnit: taxa
   }];
@@ -260,11 +260,14 @@ const excluirComandaConfirmada = async () => {
   return (
     <div className="home-containerCOMANDAS">
           <div className="sidebar">
+       
         <button onClick={() => navigate('/comandas')}>Comandas</button>
         <button onClick={() => navigate('/cardapio')}>Cardápio</button>
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
         <button onClick={() => navigate('/')}>Logout</button>
+       <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
+
       </div>
 
       <div className="home-content">
@@ -363,7 +366,7 @@ const excluirComandaConfirmada = async () => {
             </div>
 
             <div className="botoes-comanda">
-              <button onClick={adicionar10PorCento}>10%</button>
+              <button onClick={adicionar10PorCento}>Serviço Garçom</button>
               <button onClick={exportarPDF}>Imprimir</button>
               <button className="excluir" onClick={confirmarExclusaoComanda}>Excluir</button>
               <button className="encerrar-btn" onClick={salvarEEncerrar}>Salvar e Encerrar</button>

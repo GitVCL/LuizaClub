@@ -311,3 +311,11 @@
   }
 }
 
+.botao-atualizar {
+  margin-top: auto; /* empurra para o final da coluna */
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #7dc2ff;
+}

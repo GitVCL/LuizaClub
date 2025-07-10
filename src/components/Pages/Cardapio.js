@@ -98,6 +98,7 @@ function Cardapio() {
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
         <button onClick={() => navigate('/')}>Logout</button>
+         <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
       </div>
 
       <div className="CARDAPIO-content">

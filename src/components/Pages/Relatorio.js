@@ -15,7 +15,7 @@ function Relatorio() {
   const [totais, setTotais] = useState({
     comandas: { hoje: 0, semana: 0, mes: 0, ano: 0 },
   });
-  const [mostrarTotais, setMostrarTotais] = useState(true);
+  const [mostrarTotais, setMostrarTotais] = useState(false);
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
 
@@ -78,6 +78,7 @@ function Relatorio() {
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
         <button onClick={() => navigate('/')}>Logout</button>
+         <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
       </div>
 
       <div className="RELATORIO-content">
