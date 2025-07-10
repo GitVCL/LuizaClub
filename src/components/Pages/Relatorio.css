@@ -117,3 +117,14 @@
   
 
 }
+
+.RELATORIO-resultado-periodo {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #1e1e1e;
+  color: white;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 2px solid white;
+  width: fit-content;
+}

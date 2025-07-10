@@ -17,6 +17,13 @@ function Relatorio() {
   });
   const [mostrarTotais, setMostrarTotais] = useState(false);
 
+  const [dataInicio, setDataInicio] = useState('');
+  const [dataFim, setDataFim] = useState('');
+
+
+  const [totalPorPeriodo, setTotalPorPeriodo] = useState(123.45); // valor forçado
+
+
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
 
   useEffect(() => {
@@ -24,7 +31,6 @@ function Relatorio() {
       try {
         const resComandas = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
         const dadosComandas = await resComandas.json();
-
         setComandas(dadosComandas);
         calcularTotais(dadosComandas);
       } catch (err) {
@@ -70,6 +76,18 @@ function Relatorio() {
     });
   };
 
+  const buscarFinalizadosPorPeriodo = async () => {
+    try {
+      const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/finalizados/periodo?inicio=${dataInicio}&fim=${dataFim}&userId=${userId}`);
+      const data = await res.json();
+      const total = data.reduce((acc, item) => acc + item.total, 0);
+      setTotalPorPeriodo(total);
+    } catch (err) {
+      console.error('Erro ao buscar finalizados por período:', err);
+      setTotalPorPeriodo(null);
+    }
+  };
+
   return (
     <div className="RELATORIO-container">
       <div className="RELATORIO-sidebar">
@@ -78,7 +96,7 @@ function Relatorio() {
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
         <button onClick={() => navigate('/')}>Logout</button>
-         <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
+        <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
       </div>
 
       <div className="RELATORIO-content">
@@ -93,29 +111,26 @@ function Relatorio() {
             <div className="RELATORIO-card">Ano: R$ {mostrarTotais ? totais.comandas.ano.toFixed(2) : '••••'}</div>
           </div>
 
-         <button
-  className="botao-olho"
-  onClick={() => {
-    if (!mostrarTotais) {
-      const senha = prompt('Digite a senha para visualizar os valores:');
-      if (senha === 'admin123') {
-        setMostrarTotais(true);
-      }
-    } else {
-      setMostrarTotais(false);
-    }
-  }}
-  style={{ marginLeft: '5px' }}
->
-  {mostrarTotais ? 'Ocultar' : '👁️ Ver'}
-</button>
-
+          <button
+            className="botao-olho"
+            onClick={() => {
+              if (!mostrarTotais) {
+                const senha = prompt('Digite a senha para visualizar os valores:');
+                if (senha === 'admin123') {
+                  setMostrarTotais(true);
+                }
+              } else {
+                setMostrarTotais(false);
+              }
+            }}
+            style={{ marginLeft: '5px' }}
+          >
+            {mostrarTotais ? 'Ocultar' : '👁️ Ver'}
+          </button>
         </div>
 
         <div className="RELATORIO-graficos" style={{ display: 'flex', gap: '20px' }}>
           <div style={{ flex: 1 }}>
-            
-
             <div className="RELATORIO-grafico">
               <h4>% Participação por Comanda</h4>
               <PieChart width={300} height={300}>
@@ -149,6 +164,21 @@ function Relatorio() {
                 <Area type="monotone" dataKey="total" stroke="#82ca9d" fill="#82ca9d" />
               </AreaChart>
             </div>
+          </div>
+        </div>
+
+        {/* 🔽 NOVA SEÇÃO - FILTRO POR PERÍODO 🔽 */}
+        <div className="RELATORIO-periodo">
+          <h3>Buscar Finalizados por Período</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+            <button onClick={buscarFinalizadosPorPeriodo}>Buscar</button>
+            {totalPorPeriodo !== null && (
+              <div className="RELATORIO-card">
+                Período Selecionado: R$ {totalPorPeriodo.toFixed(2)}
+              </div>
+            )}
           </div>
         </div>
       </div>
