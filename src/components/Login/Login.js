@@ -59,8 +59,7 @@ const Login = () => {
         </button>
 
         <div className="extra-options">
-          <a href="/register">Criar Conta</a>
-          <a href="#">Esqueceu a Senha?</a>
+          
         </div>
       </form>
     </div>
