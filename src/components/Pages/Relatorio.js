@@ -45,37 +45,38 @@ function Relatorio() {
   const dadosComandas = comandas.map((c) => ({ nome: c.nome, total: c.total }));
 
   const calcularTotais = (comandas) => {
-    const agora = new Date();
+  const agora = new Date();
 
-    const inicioHoje = new Date();
-    inicioHoje.setHours(0, 0, 0, 0);
+  const inicioHoje = new Date();
+  inicioHoje.setHours(0, 0, 0, 0);
 
-    const inicioSemana = new Date();
-    const diaSemana = inicioSemana.getDay();
-    const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
-    inicioSemana.setDate(inicioSemana.getDate() - distSegunda);
-    inicioSemana.setHours(0, 0, 0, 0);
+  const inicioSemana = new Date();
+  const diaSemana = inicioSemana.getDay();
+  const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+  inicioSemana.setDate(inicioSemana.getDate() - distSegunda);
+  inicioSemana.setHours(0, 0, 0, 0);
 
-    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
-    const inicioAno = new Date(agora.getFullYear(), 0, 1);
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  const inicioAno = new Date(agora.getFullYear(), 0, 1);
 
-   const filtrar = (lista, data) =>
-  lista.filter((item) => {
-    if (!item.createdAt) return true;
-    return new Date(item.createdAt) >= data;
-  });
-
-    const somar = (lista) => lista.reduce((acc, item) => acc + item.total, 0);
-
-    setTotais({
-      comandas: {
-        hoje: somar(filtrar(comandas, inicioHoje)),
-        semana: somar(filtrar(comandas, inicioSemana)),
-        mes: somar(filtrar(comandas, inicioMes)),
-        ano: somar(filtrar(comandas, inicioAno)),
-      }
+  // 🔁 ATUALIZADO: usa encerradaEm em vez de createdAt
+  const filtrar = (lista, data) =>
+    lista.filter((item) => {
+      if (!item.encerradaEm) return false;
+      return new Date(item.encerradaEm) >= data;
     });
-  };
+
+  const somar = (lista) => lista.reduce((acc, item) => acc + item.total, 0);
+
+  setTotais({
+    comandas: {
+      hoje: somar(filtrar(comandas, inicioHoje)),
+      semana: somar(filtrar(comandas, inicioSemana)),
+      mes: somar(filtrar(comandas, inicioMes)),
+      ano: somar(filtrar(comandas, inicioAno)),
+    }
+  });
+};
 
   const buscarFinalizadosPorPeriodo = async () => {
   try {

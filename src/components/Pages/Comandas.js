@@ -193,7 +193,7 @@ const Comandas = () => {
   const adicionar10PorCento = () => {
   const taxa = valorTotal * 0.10;
   const novosItens = [...itens, {
-    descricao: 'Taxa do Garçom',
+    descricao: 'Serviço',
     qtd: 1,
     valorUnit: taxa
   }];
