@@ -21,7 +21,8 @@ function Relatorio() {
   const [dataFim, setDataFim] = useState('');
 
 
-  const [totalPorPeriodo, setTotalPorPeriodo] = useState(123.45); // valor forçado
+  const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
+
 
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
@@ -58,11 +59,11 @@ function Relatorio() {
     const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
     const inicioAno = new Date(agora.getFullYear(), 0, 1);
 
-    const filtrar = (lista, data) =>
-      lista.filter((item) => {
-        if (!item.createdAt) return true;
-        return new Date(item.createdAt) >= data;
-      });
+   const filtrar = (lista, data) =>
+  lista.filter((item) => {
+    if (!item.createdAt) return true;
+    return new Date(item.createdAt) >= data;
+  });
 
     const somar = (lista) => lista.reduce((acc, item) => acc + item.total, 0);
 
@@ -77,16 +78,22 @@ function Relatorio() {
   };
 
   const buscarFinalizadosPorPeriodo = async () => {
-    try {
-      const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/finalizados/periodo?inicio=${dataInicio}&fim=${dataFim}&userId=${userId}`);
-      const data = await res.json();
-      const total = data.reduce((acc, item) => acc + item.total, 0);
-      setTotalPorPeriodo(total);
-    } catch (err) {
-      console.error('Erro ao buscar finalizados por período:', err);
-      setTotalPorPeriodo(null);
-    }
-  };
+  try {
+    const inicio = new Date(dataInicio + "T00:00:00");
+    const fim = new Date(dataFim + "T23:59:59");
+
+const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
+    const data = await res.json();
+
+    console.log("Finalizados filtrados:", data);
+
+    const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);
+    setTotalPorPeriodo(total);
+  } catch (err) {
+    console.error('Erro ao buscar finalizados por período:', err);
+    setTotalPorPeriodo(null);
+  }
+};
 
   return (
     <div className="RELATORIO-container">
