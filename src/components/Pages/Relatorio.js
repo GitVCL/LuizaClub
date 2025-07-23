@@ -141,7 +141,7 @@ const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/
           <div style={{ flex: 1 }}>
             <div className="RELATORIO-grafico">
               <h4>% Participação por Comanda</h4>
-              <PieChart width={300} height={300}>
+              <PieChart width={300} height={900}>
                 <Pie data={dadosComandas} dataKey="total" nameKey="nome" outerRadius={100} label>
                   {dadosComandas.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
