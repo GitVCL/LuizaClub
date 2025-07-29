@@ -16,14 +16,9 @@ function Relatorio() {
     comandas: { hoje: 0, semana: 0, mes: 0, ano: 0 },
   });
   const [mostrarTotais, setMostrarTotais] = useState(false);
-
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
-
-
   const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
-
-
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
 
@@ -43,58 +38,55 @@ function Relatorio() {
   }, []);
 
   const dadosComandas = comandas.map((c) => ({ nome: c.nome, total: c.total }));
+  const ultimas10Comandas = dadosComandas.slice(-10);
 
   const calcularTotais = (comandas) => {
-  const agora = new Date();
+    const agora = new Date();
+    const inicioHoje = new Date();
+    inicioHoje.setHours(0, 0, 0, 0);
 
-  const inicioHoje = new Date();
-  inicioHoje.setHours(0, 0, 0, 0);
+    const inicioSemana = new Date();
+    const diaSemana = inicioSemana.getDay();
+    const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+    inicioSemana.setDate(inicioSemana.getDate() - distSegunda);
+    inicioSemana.setHours(0, 0, 0, 0);
 
-  const inicioSemana = new Date();
-  const diaSemana = inicioSemana.getDay();
-  const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
-  inicioSemana.setDate(inicioSemana.getDate() - distSegunda);
-  inicioSemana.setHours(0, 0, 0, 0);
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const inicioAno = new Date(agora.getFullYear(), 0, 1);
 
-  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
-  const inicioAno = new Date(agora.getFullYear(), 0, 1);
+    const filtrar = (lista, data) =>
+      lista.filter((item) => {
+        if (!item.encerradaEm) return false;
+        return new Date(item.encerradaEm) >= data;
+      });
 
-  // 🔁 ATUALIZADO: usa encerradaEm em vez de createdAt
-  const filtrar = (lista, data) =>
-    lista.filter((item) => {
-      if (!item.encerradaEm) return false;
-      return new Date(item.encerradaEm) >= data;
+    const somar = (lista) => lista.reduce((acc, item) => acc + item.total, 0);
+
+    setTotais({
+      comandas: {
+        hoje: somar(filtrar(comandas, inicioHoje)),
+        semana: somar(filtrar(comandas, inicioSemana)),
+        mes: somar(filtrar(comandas, inicioMes)),
+        ano: somar(filtrar(comandas, inicioAno)),
+      }
     });
-
-  const somar = (lista) => lista.reduce((acc, item) => acc + item.total, 0);
-
-  setTotais({
-    comandas: {
-      hoje: somar(filtrar(comandas, inicioHoje)),
-      semana: somar(filtrar(comandas, inicioSemana)),
-      mes: somar(filtrar(comandas, inicioMes)),
-      ano: somar(filtrar(comandas, inicioAno)),
-    }
-  });
-};
+  };
 
   const buscarFinalizadosPorPeriodo = async () => {
-  try {
-    const inicio = new Date(dataInicio + "T00:00:00");
-    const fim = new Date(dataFim + "T23:59:59");
+    try {
+      const inicio = new Date(dataInicio + "T00:00:00");
+      const fim = new Date(dataFim + "T23:59:59");
 
-const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
-    const data = await res.json();
+      const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
+      const data = await res.json();
 
-    console.log("Finalizados filtrados:", data);
-
-    const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);
-    setTotalPorPeriodo(total);
-  } catch (err) {
-    console.error('Erro ao buscar finalizados por período:', err);
-    setTotalPorPeriodo(null);
-  }
-};
+      const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);
+      setTotalPorPeriodo(total);
+    } catch (err) {
+      console.error('Erro ao buscar finalizados por período:', err);
+      setTotalPorPeriodo(null);
+    }
+  };
 
   return (
     <div className="RELATORIO-container">
@@ -141,9 +133,9 @@ const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/
           <div style={{ flex: 1 }}>
             <div className="RELATORIO-grafico">
               <h4>% Participação por Comanda</h4>
-              <PieChart width={300} height={900}>
-                <Pie data={dadosComandas} dataKey="total" nameKey="nome" outerRadius={100} label>
-                  {dadosComandas.map((_, i) => (
+              <PieChart width={300} height={300}>
+                <Pie data={ultimas10Comandas} dataKey="total" nameKey="nome" outerRadius={100} label>
+                  {ultimas10Comandas.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
@@ -153,7 +145,7 @@ const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/
 
             <div className="RELATORIO-grafico">
               <h4>Total por Comanda</h4>
-              <BarChart width={350} height={300} data={dadosComandas}>
+              <BarChart width={350} height={300} data={ultimas10Comandas}>
                 <XAxis dataKey="nome" />
                 <YAxis />
                 <Tooltip />
@@ -164,7 +156,7 @@ const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/
 
             <div className="RELATORIO-grafico">
               <h4>Área Total (Comandas)</h4>
-              <AreaChart width={350} height={300} data={dadosComandas}>
+              <AreaChart width={350} height={300} data={ultimas10Comandas}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="nome" />
                 <YAxis />
@@ -175,7 +167,6 @@ const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/
           </div>
         </div>
 
-        {/* 🔽 NOVA SEÇÃO - FILTRO POR PERÍODO 🔽 */}
         <div className="RELATORIO-periodo">
           <h3>Buscar Finalizados por Período</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

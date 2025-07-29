@@ -38,20 +38,20 @@ const Finalizados = () => {
     carregarQuartosFinalizados();
   }, []);
 
-  const todosItens = [...comandas, ...finalizados].sort((a, b) => {
-    return new Date(b.encerradaEm) - new Date(a.encerradaEm);
-  });
+  // Ordena e limita para mostrar apenas os 10 últimos
+  const todosItens = [...comandas, ...finalizados]
+    .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm))
+    .slice(0, 10);
 
   return (
     <div className="home-containerCOMANDAS">
       <div className="sidebar">
         <button onClick={() => navigate('/comandas')}>Comandas</button>
-        
         <button onClick={() => navigate('/cardapio')}>Cardápio</button>
         <button onClick={() => navigate('/relatorio')}>Relatório</button>
         <button onClick={() => navigate('/finalizados')}>Finalizados</button>
         <button onClick={() => navigate('/')}>Logout</button>
-         <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
+        <button onClick={() => window.location.reload()} title="Atualizar" className="botao-atualizar">🔄</button>
       </div>
 
       <div className="home-content">
