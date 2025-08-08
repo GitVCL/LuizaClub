@@ -1,0 +1,149 @@
+.CARDAPIO-container {
+  display: flex;
+  height: 100vh;
+  background-color: rgb(95, 87, 87);
+  background-size: cover;
+  background-position: center;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.CARDAPIO-sidebar {
+  width: 150px;
+  background-color: #202020;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.CARDAPIO-sidebar button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.CARDAPIO-sidebar button:hover {
+  background-color: #444;
+}
+
+.CARDAPIO-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.CARDAPIO-titulo {
+  font-size: 28px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid white;
+  padding-bottom: 10px;
+}
+
+.CARDAPIO-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.CARDAPIO-item-card {
+  background-color:rgba(139, 0, 0, 0.75);
+  border: 2px solid #0f0;
+  border-radius: 12px;
+  padding: 30px;
+  width: 100px;
+  min-height: 200px;
+  
+}
+
+.CARDAPIO-item-card h3 {
+  margin-top: 0;
+}
+
+.CARDAPIO-variantes {
+  margin-top: 10px;
+}
+
+.CARDAPIO-variantes div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.CARDAPIO-item-card button {
+  margin-top: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.CARDAPIO-item-card button:hover {
+  background-color: #45a049;
+}
+
+.CARDAPIO-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.CARDAPIO-form input {
+  padding: 8px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.CARDAPIO-form input::placeholder {
+  color: #ccc;
+}
+
+.CARDAPIO-form button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.CARDAPIO-form button:hover {
+  background-color: #45a049;
+}
+
+.CARDAPIO-subtitulo {
+  font-size: 22px;
+  margin: 20px 0 10px;
+  border-bottom: 1px solid white;
+  padding-bottom: 5px;
+}
+
+.CARDAPIO-excluir-btn {
+  margin-top: 10px;
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.CARDAPIO-excluir-btn:hover {
+  background-color: #a93226;
+}
