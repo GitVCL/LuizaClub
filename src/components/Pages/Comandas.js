@@ -224,9 +224,18 @@ const exportarPDF = () => {
     <head>
       <title>Comanda - ${comandaAberta?.nome}</title>
       <style>
+        @page {
+          size: 80mm auto;
+          margin: 0;
+        }
         body {
           font-family: Arial, sans-serif;
-          margin: 20px;
+          margin: 0;
+          padding: 3mm;
+          width: 80mm;
+          max-width: 80mm;
+          font-size: 12px;
+          text-align: center;
           color: black;
           background: white;
         }
@@ -237,42 +246,59 @@ const exportarPDF = () => {
         }
         h3 {
           text-align: center;
-          font-size: 20px;
-          margin-bottom: 15px;
+          font-size: 16px;
+          margin-bottom: 10px;
           font-weight: bold;
         }
         p {
-          font-size: 16px;
-          margin-bottom: 15px;
+          font-size: 10px;
+          margin-bottom: 8px;
+          text-align: center;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 10px;
+          margin-top: 5px;
+          font-size: 10px;
         }
         th, td {
-          padding: 3px 2px;
+          padding: 1px 2px;
+          font-size: 10px;
+          line-height: 1.0;
+          border: none;
+        }
+        th:first-child, td:first-child {
           text-align: left;
-          border-bottom: 1px solid #ccc;
-          font-size: 12px;
-          line-height: 1.1;
+          width: 40%;
+        }
+        th:nth-child(2), td:nth-child(2) {
+          text-align: center;
+          width: 15%;
+        }
+        th:nth-child(3), td:nth-child(3) {
+          text-align: right;
+          width: 20%;
+        }
+        th:last-child, td:last-child {
+          text-align: right;
+          width: 25%;
         }
         th {
           font-weight: bold;
-          border-bottom: 2px solid #000;
+          border-bottom: 1px solid #000;
         }
         .total {
-          margin-top: 15px;
+          margin-top: 8px;
           font-weight: bold;
-          font-size: 18px;
+          font-size: 14px;
           text-align: right;
-          border-top: 2px solid #000;
-          padding-top: 8px;
+          border-top: 1px solid #000;
+          padding-top: 5px;
         }
         .footer {
           font-size: 8px;
           text-align: center;
-          margin-top: 20px;
+          margin-top: 10px;
           font-style: italic;
         }
         @media print {

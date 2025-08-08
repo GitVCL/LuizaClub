@@ -298,28 +298,78 @@
   #nota-pdf {
     display: block !important;
     width: 80mm !important;
-    padding: 5px !important;
+    max-width: 80mm !important;
+    padding: 3mm !important;
+    margin: 0 auto !important;
     font-size: 68px !important;
     color: #000 !important;
+    text-align: center !important;
   }
 
-  #nota-pdf *,
-  #nota-pdf table,
+  #nota-pdf table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 5px 0 !important;
+    font-size: 10px !important;
+  }
+
   #nota-pdf td,
   #nota-pdf th {
-    font-size: 28px !important;
+    font-size: 10px !important;
     color: #000 !important;
-    padding: 2px !important;
-    line-height: 1.1 !important;
+    padding: 1px 2px !important;
+    line-height: 1.0 !important;
+    text-align: left !important;
+    border: none !important;
+  }
+
+  #nota-pdf th:first-child,
+  #nota-pdf td:first-child {
+    text-align: left !important;
+    width: 40% !important;
+  }
+
+  #nota-pdf th:nth-child(2),
+  #nota-pdf td:nth-child(2) {
+    text-align: center !important;
+    width: 15% !important;
+  }
+
+  #nota-pdf th:nth-child(3),
+  #nota-pdf td:nth-child(3) {
+    text-align: right !important;
+    width: 20% !important;
+  }
+
+  #nota-pdf th:last-child,
+  #nota-pdf td:last-child {
+    text-align: right !important;
+    width: 25% !important;
   }
 
   /* Títulos específicos - GRANDES */
   #nota-pdf h1,
   #nota-pdf h2,
-  #nota-pdf h3,
-  #nota-pdf strong {
-    font-size: 40px !important;
+  #nota-pdf h3 {
+    font-size: 16px !important;
     font-weight: bold !important;
+    text-align: center !important;
+    margin: 3px 0 !important;
+  }
+
+  #nota-pdf .total {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    text-align: right !important;
+    margin-top: 5px !important;
+    border-top: 1px solid #000 !important;
+    padding-top: 3px !important;
+  }
+
+  #nota-pdf .footer {
+    font-size: 8px !important;
+    text-align: center !important;
+    margin-top: 5px !important;
   }
 }
 
