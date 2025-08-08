@@ -258,13 +258,13 @@ const exportarPDF = () => {
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 5px;
-          font-size: 10px;
+          margin: 5px 0;
+          font-size: 14px;
         }
         th, td {
-          padding: 1px 2px;
-          font-size: 10px;
-          line-height: 1.0;
+          padding: 2px 3px;
+          font-size: 14px;
+          line-height: 1.2;
           border: none;
         }
         th:first-child, td:first-child {
@@ -290,10 +290,12 @@ const exportarPDF = () => {
         .total {
           margin-top: 8px;
           font-weight: bold;
-          font-size: 14px;
-          text-align: right;
+          font-size: 18px;
+          text-align: left;
           border-top: 1px solid #000;
           padding-top: 5px;
+          width: 100%;
+          display: block;
         }
         .footer {
           font-size: 8px;
