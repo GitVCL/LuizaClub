@@ -298,7 +298,7 @@
   #nota-pdf {
     display: block !important;
     width: 80mm !important;
-    padding: 10px !important;
+    padding: 5px !important;
     font-size: 68px !important;
     color: #000 !important;
   }
@@ -307,11 +307,13 @@
   #nota-pdf table,
   #nota-pdf td,
   #nota-pdf th {
-    font-size: 48px !important;
+    font-size: 28px !important;
     color: #000 !important;
+    padding: 2px !important;
+    line-height: 1.1 !important;
   }
 
-  /* Títulos específicos */
+  /* Títulos específicos - GRANDES */
   #nota-pdf h1,
   #nota-pdf h2,
   #nota-pdf h3,
