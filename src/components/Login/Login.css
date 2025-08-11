@@ -55,6 +55,28 @@ body {
   background-color: #45a049;
 }
 
+.manter-logado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 15px 0;
+  color: #fff;
+  font-size: 14px;
+}
+
+.manter-logado input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  transform: scale(1.2);
+  accent-color: #4CAF50;
+}
+
+.manter-logado label {
+  cursor: pointer;
+  user-select: none;
+}
+
 .extra-options {
   margin-top: 15px;
   display: flex;
