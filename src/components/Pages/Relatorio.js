@@ -19,6 +19,8 @@ function Relatorio() {
   const [mostrarTotais, setMostrarTotais] = useState(false);
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
+  const [horaInicio, setHoraInicio] = useState('00:00');
+  const [horaFim, setHoraFim] = useState('23:59');
   const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
@@ -75,8 +77,8 @@ function Relatorio() {
 
   const buscarFinalizadosPorPeriodo = async () => {
     try {
-      const inicio = new Date(dataInicio + "T00:00:00");
-      const fim = new Date(dataFim + "T23:59:59");
+      const inicio = new Date(dataInicio + "T" + horaInicio + ":00");
+      const fim = new Date(dataFim + "T" + horaFim + ":59");
 
       const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
       const data = await res.json();
@@ -240,42 +242,120 @@ function Relatorio() {
         
         <div style={{ 
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
           gap: '15px',
           alignItems: 'center'
         }}>
-          <input 
-            type="date" 
-            value={dataInicio} 
-            onChange={(e) => setDataInicio(e.target.value)}
-            style={{
-              padding: '12px',
-              borderRadius: '8px',
-              border: '2px solid #00ff00',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              color: '#00ff00',
-              fontSize: '16px'
-            }}
-          />
-          <input 
-            type="date" 
-            value={dataFim} 
-            onChange={(e) => setDataFim(e.target.value)}
-            style={{
-              padding: '12px',
-              borderRadius: '8px',
-              border: '2px solid #00ff00',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              color: '#00ff00',
-              fontSize: '16px'
-            }}
-          />
-          <button 
-            className="btn-primary"
-            onClick={buscarFinalizadosPorPeriodo}
-          >
-            Buscar
-          </button>
+          <div>
+            <label style={{ color: '#00ff00', fontSize: '14px', marginBottom: '5px', display: 'block' }}>Data Início:</label>
+            <input 
+              type="date" 
+              value={dataInicio} 
+              onChange={(e) => setDataInicio(e.target.value)}
+              style={{
+                 padding: '12px',
+                 borderRadius: '8px',
+                 border: '2px solid #00ff00',
+                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                 color: '#00ff00',
+                 fontSize: '16px',
+                 width: '100%',
+                 boxShadow: '0 2px 8px rgba(0, 255, 0, 0.2)',
+                 transition: 'all 0.3s ease'
+               }}
+            />
+          </div>
+          <div>
+            <label style={{ color: '#00ff00', fontSize: '14px', marginBottom: '5px', display: 'block' }}>Hora Início:</label>
+            <input 
+              type="time" 
+              value={horaInicio} 
+              onChange={(e) => setHoraInicio(e.target.value)}
+              style={{
+                 padding: '12px',
+                 borderRadius: '8px',
+                 border: '2px solid #00ff00',
+                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                 color: '#00ff00',
+                 fontSize: '16px',
+                 width: '100%',
+                 boxShadow: '0 2px 8px rgba(0, 255, 0, 0.2)',
+                 transition: 'all 0.3s ease'
+               }}
+            />
+          </div>
+          <div>
+            <label style={{ color: '#00ff00', fontSize: '14px', marginBottom: '5px', display: 'block' }}>Data Fim:</label>
+            <input 
+              type="date" 
+              value={dataFim} 
+              onChange={(e) => setDataFim(e.target.value)}
+              style={{
+                 padding: '12px',
+                 borderRadius: '8px',
+                 border: '2px solid #00ff00',
+                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                 color: '#00ff00',
+                 fontSize: '16px',
+                 width: '100%',
+                 boxShadow: '0 2px 8px rgba(0, 255, 0, 0.2)',
+                 transition: 'all 0.3s ease'
+               }}
+            />
+          </div>
+          <div>
+            <label style={{ color: '#00ff00', fontSize: '14px', marginBottom: '5px', display: 'block' }}>Hora Fim:</label>
+            <input 
+              type="time" 
+              value={horaFim} 
+              onChange={(e) => setHoraFim(e.target.value)}
+              style={{
+                 padding: '12px',
+                 borderRadius: '8px',
+                 border: '2px solid #00ff00',
+                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                 color: '#00ff00',
+                 fontSize: '16px',
+                 width: '100%',
+                 boxShadow: '0 2px 8px rgba(0, 255, 0, 0.2)',
+                 transition: 'all 0.3s ease'
+               }}
+            />
+          </div>
+          <div style={{ alignSelf: 'end' }}>
+             <button 
+               className="btn-primary"
+               onClick={buscarFinalizadosPorPeriodo}
+               style={{
+                 width: '100%',
+                 padding: '15px 20px',
+                 marginTop: '24px',
+                 backgroundColor: '#00ff00',
+                 color: '#000000',
+                 border: '3px solid #00ff00',
+                 borderRadius: '10px',
+                 fontSize: '18px',
+                 fontWeight: 'bold',
+                 cursor: 'pointer',
+                 transition: 'all 0.3s ease',
+                 boxShadow: '0 4px 15px rgba(0, 255, 0, 0.3)',
+                 textTransform: 'uppercase',
+                 letterSpacing: '1px'
+               }}
+               onMouseEnter={(e) => {
+                 e.target.style.backgroundColor = '#00cc00';
+                 e.target.style.transform = 'translateY(-2px)';
+                 e.target.style.boxShadow = '0 6px 20px rgba(0, 255, 0, 0.5)';
+               }}
+               onMouseLeave={(e) => {
+                 e.target.style.backgroundColor = '#00ff00';
+                 e.target.style.transform = 'translateY(0)';
+                 e.target.style.boxShadow = '0 4px 15px rgba(0, 255, 0, 0.3)';
+               }}
+             >
+               🔍 Buscar Período
+             </button>
+           </div>
         </div>
         
         {totalPorPeriodo !== null && (
