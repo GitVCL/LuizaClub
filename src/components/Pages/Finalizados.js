@@ -6,43 +6,91 @@ import '../Layout/GlobalLayout.css';
 const Finalizados = () => {
   const navigate = useNavigate();
   const [comandas, setComandas] = useState([]);
-  const [finalizados, setFinalizados] = useState([]);
+  const [filtroAtivo, setFiltroAtivo] = useState('semana');
+  const [carregando, setCarregando] = useState(false);
+
+  const carregarDadosPorPeriodo = async (periodo) => {
+    setCarregando(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      console.log('🔍 Carregando dados para período:', periodo);
+      console.log('👤 UserId:', userId);
+      
+      if (!userId) {
+        console.error('❌ UserId não encontrado no localStorage');
+        alert('Erro: Usuário não autenticado. Faça login novamente.');
+        navigate('/login');
+        return;
+      }
+      
+      const agora = new Date();
+      let dataInicio;
+      
+      if (periodo === 'dia') {
+        dataInicio = new Date();
+        dataInicio.setHours(0, 0, 0, 0);
+      } else if (periodo === 'semana') {
+        dataInicio = new Date();
+        const diaSemana = dataInicio.getDay();
+        const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+        dataInicio.setDate(dataInicio.getDate() - distSegunda);
+        dataInicio.setHours(0, 0, 0, 0);
+      }
+      
+      const dataFim = new Date();
+      dataFim.setHours(23, 59, 59, 999);
+      
+      console.log('📅 Período de busca:', {
+        inicio: dataInicio.toLocaleString(),
+        fim: dataFim.toLocaleString()
+      });
+      
+      // Buscar comandas finalizadas do período
+      console.log('🔄 Buscando comandas...');
+      const resComandas = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
+      
+      if (!resComandas.ok) {
+        console.error('❌ Erro na requisição de comandas:', resComandas.status);
+        throw new Error(`Erro ${resComandas.status} ao buscar comandas`);
+      }
+      
+      const dataComandas = await resComandas.json();
+      console.log('📊 Total de comandas recebidas:', dataComandas.length);
+      
+      const comandasFiltradas = dataComandas
+        .filter(c => {
+          if (c.status !== 'finalizada') return false;
+          const dataEncerramento = new Date(c.encerradaEm);
+          return dataEncerramento >= dataInicio && dataEncerramento <= dataFim;
+        })
+        .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm))
+        .slice(0, periodo === 'dia' ? 10 : 50) // Limita resultados
+        .map(c => ({ ...c, tipo: 'comanda' }));
+      
+      console.log('✅ Comandas filtradas:', comandasFiltradas.length);
+      
+      setComandas(comandasFiltradas);
+      
+      console.log('🎯 Dados carregados com sucesso!');
+    } catch (err) {
+      console.error('Erro ao carregar dados por período:', err);
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   useEffect(() => {
-    const carregarComandasFinalizadas = async () => {
-      try {
-        const userId = localStorage.getItem('userId');
-        const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
-        const data = await res.json();
-        const filtradas = data
-          .filter(c => c.status === 'finalizada')
-          .map(c => ({ ...c, tipo: 'comanda' }));
-        setComandas(filtradas);
-      } catch (err) {
-        console.error('Erro ao carregar comandas finalizadas:', err);
-      }
-    };
-
-    const carregarQuartosFinalizados = async () => {
-      try {
-        const userId = localStorage.getItem('userId');
-        const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/finalizados/${userId}`);
-        const data = await res.json();
-        const comTipo = data.map(q => ({ ...q, tipo: 'quarto' }));
-        setFinalizados(comTipo);
-      } catch (err) {
-        console.error('Erro ao carregar quartos finalizados:', err);
-      }
-    };
-
-    carregarComandasFinalizadas();
-    carregarQuartosFinalizados();
+    carregarDadosPorPeriodo('semana'); // Carrega dados da semana por padrão
   }, []);
 
-  // Ordena e limita para mostrar apenas os 10 últimos
-  const todosItens = [...comandas, ...finalizados]
-    .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm))
-    .slice(0, 10);
+  // Recarrega dados quando o filtro ativo muda
+  useEffect(() => {
+    carregarDadosPorPeriodo(filtroAtivo);
+  }, [filtroAtivo]);
+
+  // Ordena todas as comandas por data de encerramento
+  const todosItens = comandas
+    .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm));
 
   return (
     <ResponsiveLayout>
@@ -56,25 +104,138 @@ const Finalizados = () => {
           gap: '15px'
         }}>
           <h2 style={{ margin: 0, color: '#333', fontSize: '28px' }}>Finalizados</h2>
-          <button 
-            onClick={() => window.location.reload()} 
-            title="Atualizar" 
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            🔄 Atualizar
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button 
+              onClick={() => carregarDadosPorPeriodo(filtroAtivo)} 
+              title="Atualizar" 
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              🔄 Atualizar
+            </button>
+          </div>
         </div>
+
+        {/* Cards de Filtro por Período */}
+        <div style={{
+          marginBottom: '30px',
+          padding: '25px',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          borderRadius: '15px',
+          border: '2px solid #00ff00'
+        }}>
+          <h3 style={{
+            color: '#00ff00',
+            textAlign: 'center',
+            marginBottom: '25px',
+            fontSize: '22px',
+            fontWeight: 'bold'
+          }}>
+            🎯 Filtros por Período
+          </h3>
+          
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              onClick={() => setFiltroAtivo('dia')}
+              style={{
+                padding: '15px 30px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '12px',
+                border: filtroAtivo === 'dia' ? '3px solid #00ff00' : '2px solid #666',
+                backgroundColor: filtroAtivo === 'dia' ? '#00ff00' : 'rgba(0, 0, 0, 0.7)',
+                color: filtroAtivo === 'dia' ? '#000' : '#00ff00',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filtroAtivo === 'dia' ? '0 6px 20px rgba(0, 255, 0, 0.4)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                transform: filtroAtivo === 'dia' ? 'translateY(-3px)' : 'translateY(0)',
+                minWidth: '120px'
+              }}
+              onMouseEnter={(e) => {
+                if (filtroAtivo !== 'dia') {
+                  e.target.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+                  e.target.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (filtroAtivo !== 'dia') {
+                  e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                  e.target.style.transform = 'translateY(0)';
+                }
+              }}
+            >
+              📅 DIA
+            </button>
+            
+            <button
+              onClick={() => setFiltroAtivo('semana')}
+              style={{
+                padding: '15px 30px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                borderRadius: '12px',
+                border: filtroAtivo === 'semana' ? '3px solid #00ff00' : '2px solid #666',
+                backgroundColor: filtroAtivo === 'semana' ? '#00ff00' : 'rgba(0, 0, 0, 0.7)',
+                color: filtroAtivo === 'semana' ? '#000' : '#00ff00',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filtroAtivo === 'semana' ? '0 6px 20px rgba(0, 255, 0, 0.4)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                transform: filtroAtivo === 'semana' ? 'translateY(-3px)' : 'translateY(0)',
+                minWidth: '120px'
+              }}
+              onMouseEnter={(e) => {
+                if (filtroAtivo !== 'semana') {
+                  e.target.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+                  e.target.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (filtroAtivo !== 'semana') {
+                  e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                  e.target.style.transform = 'translateY(0)';
+                }
+              }}
+            >
+              📊 SEMANA
+            </button>
+          </div>
+          
+          <div style={{
+             marginTop: '20px',
+             textAlign: 'center',
+             color: '#00ff00',
+             fontSize: '16px'
+           }}>
+             Mostrando: <strong>{filtroAtivo === 'dia' ? 'Hoje (últimos 10)' : 'Esta Semana (últimos 50)'}</strong> | 
+             Total de itens: <strong>{todosItens.length}</strong>
+           </div>
+        </div>
+
+        {carregando && (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px',
+            color: '#007bff',
+            fontSize: '18px'
+          }}>
+            🔄 Carregando dados do {filtroAtivo}...
+          </div>
+        )}
 
         <div style={{
           display: 'grid',
@@ -147,19 +308,21 @@ const Finalizados = () => {
                 <span style={{
                   display: 'inline-block',
                   padding: '4px 12px',
-                  backgroundColor: item.tipo === 'quarto' ? '#17a2b8' : '#6f42c1',
+                  backgroundColor: '#6f42c1',
                   color: 'white',
                   borderRadius: '20px',
                   fontSize: '12px',
                   fontWeight: '500',
                   marginTop: '10px'
                 }}>
-                  {item.tipo === 'quarto' ? 'Quarto' : 'Comanda'}
+                  Comanda
                 </span>
               </div>
             ))
           )}
         </div>
+
+
       </div>
     </ResponsiveLayout>
   );
