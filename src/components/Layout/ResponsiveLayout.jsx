@@ -5,6 +5,8 @@ import '../GlobalLayout.css';
 const ResponsiveLayout = ({ children, title }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [notifySupported, setNotifySupported] = useState(false);
+  const [notifyPermission, setNotifyPermission] = useState('default');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,6 +29,32 @@ const ResponsiveLayout = ({ children, title }) => {
     }
   }, [location, isMobile]);
 
+  // Checar suporte e status de permissão de Notificações
+  useEffect(() => {
+    const supported = 'Notification' in window;
+    setNotifySupported(supported);
+    if (supported) {
+      setNotifyPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestNotifications = async () => {
+    try {
+      if (!('Notification' in window)) return;
+      const result = await Notification.requestPermission();
+      setNotifyPermission(result);
+      if (result === 'granted') {
+        try {
+          new Notification('Notificações ativadas', { body: 'Você receberá alertas das Comandas.' });
+        } catch (err) {
+          console.warn('Notificação de teste falhou:', err);
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao solicitar permissões de notificação:', err);
+    }
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -39,6 +67,7 @@ const ResponsiveLayout = ({ children, title }) => {
     { path: '/comandas', label: 'Comandas', icon: '📋' },
     { path: '/cardapio', label: 'Cardápio', icon: '🍽️' },
     { path: '/relatorio', label: 'Relatório', icon: '📊' },
+    // { path: '/finalizados', label: 'Finalizados', icon: '✅' }, // removido
     { path: '/drinks', label: 'Drinks', icon: '🍹' },
     { path: '/quartos', label: 'Quartos', icon: '🛏️' },
     { path: '/', label: 'Logout', icon: '🚪' }
@@ -136,13 +165,25 @@ const ResponsiveLayout = ({ children, title }) => {
             borderBottom: '2px solid #00ff00',
             paddingBottom: '15px'
           }}>
-            <h1 style={{ 
-              color: '#00ff00', 
-              fontSize: isMobile ? '24px' : '32px',
-              textAlign: isMobile ? 'center' : 'left'
-            }}>
-              {title}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <h1 style={{ 
+                color: '#00ff00', 
+                fontSize: isMobile ? '24px' : '32px',
+                textAlign: isMobile ? 'center' : 'left',
+                margin: 0
+              }}>
+                {title}
+              </h1>
+              {notifySupported && notifyPermission === 'default' && (
+                <button 
+                  className="btn-secondary" 
+                  onClick={requestNotifications}
+                  title="Ativar notificações do navegador"
+                >
+                  Ativar Notificações
+                </button>
+              )}
+            </div>
           </header>
         )}
         
