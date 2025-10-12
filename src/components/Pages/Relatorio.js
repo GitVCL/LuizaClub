@@ -8,6 +8,8 @@ import {
 import ResponsiveLayout from '../Layout/ResponsiveLayout';
 import '../GlobalLayout.css';
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 function Relatorio() {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
