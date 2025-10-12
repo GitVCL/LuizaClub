@@ -13,7 +13,7 @@ function Cardapio() {
     variantes: ''
   });
 
-  const API_URL = 'https://luizaclubbackend-production.up.railway.app/api/produtos';
+  const API_URL = 'http://localhost:5000/api/produtos';
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -271,3 +271,4 @@ function Cardapio() {
 }
 
 export default Cardapio;
+

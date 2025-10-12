@@ -47,7 +47,7 @@ const Finalizados = () => {
       
       // Buscar comandas finalizadas do período
       console.log('🔄 Buscando comandas...');
-      const resComandas = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
+      const resComandas = await fetch(`http://localhost:5000/api/comandas/${userId}`);
       
       if (!resComandas.ok) {
         console.error('❌ Erro na requisição de comandas:', resComandas.status);
@@ -121,7 +121,7 @@ const Finalizados = () => {
                 gap: '8px'
               }}
             >
-              🔄 Atualizar
+              <span style={{ color: 'white', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>↻ Atualizar</span>
             </button>
           </div>
         </div>
@@ -329,3 +329,4 @@ const Finalizados = () => {
 };
 
 export default Finalizados;
+

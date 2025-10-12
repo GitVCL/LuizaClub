@@ -11,7 +11,9 @@ import RegisterCodeVerify from './components/Login/RegisterCodeVerify.js';
 import Comandas from './components/Pages/Comandas.js';
 import Cardapio from './components/Pages/Cardapio.js'
 import Relatorio from './components/Pages/Relatorio.js'
-import Finalizados from './components/Pages/Finalizados.js';
+// import Finalizados from './components/Pages/Finalizados.js'; // removido
+import Drinks from './components/Pages/Drinks.js';
+import Quartos from './components/Pages/Quartos.js';
 
 
 function App() {
@@ -52,7 +54,11 @@ function App() {
           <Route path="/relatorio" element={<Relatorio />} />
 
                   {/* Rota para Finalizados */}
-          <Route path="/finalizados" element={<Finalizados />} />
+          {/* <Route path="/finalizados" element={<Finalizados />} /> */}
+          {/* Rota para Drinks */}
+          <Route path="/drinks" element={<Drinks />} />
+          {/* Rota para Quartos */}
+          <Route path="/quartos" element={<Quartos />} />
 
 
 
@@ -70,3 +76,4 @@ function App() {
 }
 
 export default App;
+

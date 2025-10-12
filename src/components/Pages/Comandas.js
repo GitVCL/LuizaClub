@@ -16,6 +16,12 @@ const Comandas = () => {
   const [numeroComanda, setNumeroComanda] = useState('');
   const [produtos, setProdutos] = useState([]);
   const [modalExcluir, setModalExcluir] = useState(false);
+  const [finalizadosVisivel, setFinalizadosVisivel] = useState(false);
+  const [comandasFinalizadas, setComandasFinalizadas] = useState([]);
+  const [finalizadosCarregando, setFinalizadosCarregando] = useState(false);
+  const [filtroInicio, setFiltroInicio] = useState('');
+  const [filtroFim, setFiltroFim] = useState('');
+  const [filtroNome, setFiltroNome] = useState('');
 
 
   useEffect(() => {
@@ -26,7 +32,7 @@ const Comandas = () => {
   const carregarComandas = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${userId}`);
+      const res = await fetch(`http://localhost:5000/api/comandas/${userId}`);
       const data = await res.json();
       setComandas(data.filter(c => c.status !== 'finalizada'));
     } catch (err) {
@@ -34,9 +40,32 @@ const Comandas = () => {
     }
   };
 
+  const carregarComandasFinalizadas = async () => {
+    setFinalizadosCarregando(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      const res = await fetch(`http://localhost:5000/api/comandas/${userId}`);
+      const data = await res.json();
+      const lista = data
+        .filter(c => c.status === 'finalizada')
+        .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm));
+      setComandasFinalizadas(lista);
+    } catch (err) {
+      console.error('Erro ao carregar comandas finalizadas:', err);
+    } finally {
+      setFinalizadosCarregando(false);
+    }
+  };
+
+  useEffect(() => {
+    if (finalizadosVisivel) {
+      carregarComandasFinalizadas();
+    }
+  }, [finalizadosVisivel]);
+
   const carregarProdutos = async () => {
     try {
-      const res = await fetch(`https://luizaclubbackend-production.up.railway.app/api/produtos`);
+      const res = await fetch(`http://localhost:5000/api/produtos`);
       const data = await res.json();
       setProdutos(data);
     } catch (err) {
@@ -57,7 +86,7 @@ const Comandas = () => {
     };
 
     try {
-      const res = await fetch('https://luizaclubbackend-production.up.railway.app/api/comandas', {
+      const res = await fetch('http://localhost:5000/api/comandas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nova),
@@ -86,7 +115,7 @@ const Comandas = () => {
 
   const salvarComandaNoBanco = async (comanda) => {
     try {
-      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comanda.id}`, {
+      await fetch(`http://localhost:5000/api/comandas/${comanda.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comanda),
@@ -110,7 +139,7 @@ const Comandas = () => {
     };
 
     try {
-      await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comFinalizada.id}`, {
+      await fetch(`http://localhost:5000/api/comandas/${comFinalizada.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comFinalizada)
@@ -367,7 +396,7 @@ const excluirComandaConfirmada = async () => {
   if (!comandaAberta) return;
 
   try {
-    await fetch(`https://luizaclubbackend-production.up.railway.app/api/comandas/${comandaAberta.id}`, {
+    await fetch(`http://localhost:5000/api/comandas/${comandaAberta.id}`, {
       method: 'DELETE'
     });
 
@@ -921,9 +950,104 @@ const excluirComandaConfirmada = async () => {
           </div>
         </div>
       )}
+
+      {/* Finalizados inline com botão para abrir/fechar e filtros */}
+      <div
+        className="card"
+        style={{ marginTop: 24 }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ margin: 0 }}>Finalizados</h3>
+          <button className="btn-secondary" onClick={() => setFinalizadosVisivel(v => !v)}>
+            {finalizadosVisivel ? 'Ocultar' : 'Mostrar'}
+          </button>
+        </div>
+
+        {finalizadosVisivel && (
+          <div style={{ marginTop: 12 }}>
+            {/* Filtros */}
+            <div className="form-grid" style={{ marginBottom: 12 }}>
+              <div className="form-group">
+                <label className="form-label">Data Início</label>
+                <input type="date" className="form-input" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Data Fim</label>
+                <input type="date" className="form-input" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Buscar por Nome</label>
+                <input type="text" className="form-input" placeholder="Ex: Maria" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} />
+              </div>
+              <div className="form-group" style={{ alignSelf: 'end' }}>
+                <button className="btn-secondary" onClick={() => { setFiltroInicio(''); setFiltroFim(''); setFiltroNome(''); }}>Limpar Filtro</button>
+              </div>
+            </div>
+
+            {/* Lista */}
+            {finalizadosCarregando ? (
+              <div>Carregando...</div>
+            ) : (
+              (() => {
+                const porData = (!filtroInicio && !filtroFim) ? comandasFinalizadas : comandasFinalizadas.filter(c => {
+                  if (!c.encerradaEm) return false;
+                  const encerrado = new Date(c.encerradaEm);
+                  const inicio = filtroInicio ? new Date(`${filtroInicio}T00:00:00`) : null;
+                  const fim = filtroFim ? new Date(`${filtroFim}T23:59:59`) : null;
+                  if (inicio && encerrado < inicio) return false;
+                  if (fim && encerrado > fim) return false;
+                  return true;
+                });
+                const filtrados = (!filtroNome ? porData : porData.filter(c => {
+                  const base = ((c.dono || '') + ' ' + (c.nome || '')).toLowerCase();
+                  return base.includes(filtroNome.trim().toLowerCase());
+                }));
+
+                return (
+                  <>
+                    <div style={{ marginBottom: 8, color: '#00ff00', fontWeight: 'bold' }}>
+                      Total encontrados: {filtrados.length}
+                    </div>
+                    {filtrados.length === 0 ? (
+                      <div className="card">Nenhuma comanda finalizada</div>
+                    ) : (
+                      <div className="responsive-grid">
+                        {filtrados.map((c) => (
+                          <div key={c.id} className="card">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <h3 style={{ margin: 0 }}>{c.nome}</h3>
+                                {c.dono && (
+                                  <p style={{ margin: 0, color: '#aaa' }}>Dono: {c.dono}</p>
+                                )}
+                              </div>
+                              <span className="badge" style={{ backgroundColor: '#888' }}>finalizada</span>
+                            </div>
+
+                            <div style={{ marginTop: 8 }} className="grid-2">
+                              <div>
+                                <p style={{ margin: 0 }}>Itens: <strong>{(c.itens || []).length}</strong></p>
+                                <p style={{ margin: 0 }}>Total: <strong>R$ {(c.total || 0).toFixed(2)}</strong></p>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <p style={{ margin: 0 }}>Encerrada em: <strong>{new Date(c.encerradaEm).toLocaleString()}</strong></p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()
+            )}
+          </div>
+        )}
+      </div>
       </>
     </ResponsiveLayout>
   );
 };
 
 export default Comandas;
+

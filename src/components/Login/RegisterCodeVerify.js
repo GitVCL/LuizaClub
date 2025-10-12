@@ -10,7 +10,7 @@ const RegisterCodeVerify = () => {
 
   const verificarCodigo = async () => {
     try {
-      const response = await fetch('https://luizaclubbackend-production.up.railway.app/api/auth/register/verify-code', {
+      const response = await fetch('http://localhost:5000/api/auth/register/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),
@@ -51,3 +51,4 @@ const RegisterCodeVerify = () => {
 };
 
 export default RegisterCodeVerify;
+

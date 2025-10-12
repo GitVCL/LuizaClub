@@ -39,7 +39,8 @@ const ResponsiveLayout = ({ children, title }) => {
     { path: '/comandas', label: 'Comandas', icon: '📋' },
     { path: '/cardapio', label: 'Cardápio', icon: '🍽️' },
     { path: '/relatorio', label: 'Relatório', icon: '📊' },
-    { path: '/finalizados', label: 'Finalizados', icon: '✅' },
+    { path: '/drinks', label: 'Drinks', icon: '🍹' },
+    { path: '/quartos', label: 'Quartos', icon: '🛏️' },
     { path: '/', label: 'Logout', icon: '🚪' }
   ];
 
