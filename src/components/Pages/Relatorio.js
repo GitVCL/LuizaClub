@@ -28,7 +28,7 @@ function Relatorio() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resComandas = await fetch(`http://localhost:5000/api/comandas/${userId}`);
+        const resComandas = await fetch(`${API_BASE}/api/comandas/${userId}`);
         const dadosComandas = await resComandas.json();
         setComandas(dadosComandas);
         calcularTotais(dadosComandas);
@@ -80,7 +80,7 @@ function Relatorio() {
       const inicio = new Date(dataInicio + "T" + horaInicio + ":00");
       const fim = new Date(dataFim + "T" + horaFim + ":59");
 
-      const res = await fetch(`http://localhost:5000/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
+      const res = await fetch(`${API_BASE}/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
       const data = await res.json();
 
       const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);

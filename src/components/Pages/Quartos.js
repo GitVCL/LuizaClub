@@ -67,7 +67,7 @@ function Quartos() {
   const [filtroNome, setFiltroNome] = useState('');
 
   const userId = localStorage.getItem('userId');
-  const API = 'http://localhost:5000/api/quartos';
+  const API = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/quartos`;
 
   const carregar = async () => {
     setLoading(true);

@@ -13,7 +13,7 @@ function Cardapio() {
     variantes: ''
   });
 
-  const API_URL = 'http://localhost:5000/api/produtos';
+  const API_URL = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/produtos`;
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {

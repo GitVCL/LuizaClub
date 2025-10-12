@@ -47,7 +47,7 @@ const Finalizados = () => {
       
       // Buscar comandas finalizadas do período
       console.log('🔄 Buscando comandas...');
-      const resComandas = await fetch(`http://localhost:5000/api/comandas/${userId}`);
+      const resComandas = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/comandas/${userId}`);
       
       if (!resComandas.ok) {
         console.error('❌ Erro na requisição de comandas:', resComandas.status);

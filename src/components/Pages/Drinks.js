@@ -33,7 +33,7 @@ function Drinks() {
     try {
       setErrorMsg('');
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/drinks/${userId}`);
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${userId}`);
       if (!res.ok) {
         const text = await res.text();
         console.error('Falha ao carregar drinks:', res.status, res.statusText, text);
@@ -53,7 +53,7 @@ function Drinks() {
 
   async function carregarProdutos() {
     try {
-      const res = await fetch('http://localhost:5000/api/produtos');
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/produtos`);
       const data = await res.json();
       setProdutos(data);
     } catch (err) {
@@ -70,7 +70,7 @@ function Drinks() {
     e.preventDefault();
     if (!form.funcionaria || !form.inicio || !form.fim) return alert('Preencha funcionária e período');
     try {
-      const res = await fetch('http://localhost:5000/api/drinks', {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +94,7 @@ function Drinks() {
   async function editarRegistro(id, campo, valor) {
     try {
       const body = { [campo]: valor };
-      const res = await fetch(`http://localhost:5000/api/drinks/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -109,7 +109,7 @@ function Drinks() {
 
   async function addUm(id) {
     try {
-      const res = await fetch(`http://localhost:5000/api/drinks/${id}/add`, { method: 'PATCH' });
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${id}/add`, { method: 'PATCH' });
       if (!res.ok) throw new Error('Erro ao adicionar');
       await carregar();
     } catch (err) {
@@ -120,7 +120,7 @@ function Drinks() {
 
   async function removeUm(id) {
     try {
-      const res = await fetch(`http://localhost:5000/api/drinks/${id}/remove`, { method: 'PATCH' });
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${id}/remove`, { method: 'PATCH' });
       if (!res.ok) throw new Error('Erro ao remover');
       await carregar();
     } catch (err) {
@@ -131,7 +131,7 @@ function Drinks() {
 
   async function removerRegistro(id) {
     try {
-      const res = await fetch(`http://localhost:5000/api/drinks/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Erro ao deletar');
       await carregar();
     } catch (err) {
