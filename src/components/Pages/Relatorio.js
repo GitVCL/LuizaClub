@@ -15,6 +15,10 @@ function Relatorio() {
   const userId = localStorage.getItem('userId');
 
   const [comandas, setComandas] = useState([]);
+  // Quartos
+  const [quartos, setQuartos] = useState([]);
+  const [totaisQuartos, setTotaisQuartos] = useState({ hoje: 0, semana: 0, mes: 0, ano: 0 });
+  const [mostrarTotaisQuartos, setMostrarTotaisQuartos] = useState(false);
   const [totais, setTotais] = useState({
     comandas: { hoje: 0, semana: 0, mes: 0, ano: 0 },
   });
@@ -34,6 +38,11 @@ function Relatorio() {
         const dadosComandas = await resComandas.json();
         setComandas(dadosComandas);
         calcularTotais(dadosComandas);
+
+        const resQuartos = await fetch(`${API_BASE}/api/quartos/${userId}`);
+        const dadosQuartos = await resQuartos.json();
+        setQuartos(dadosQuartos);
+        calcularTotaisQuartos(dadosQuartos);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
       }
@@ -74,6 +83,36 @@ function Relatorio() {
         mes: somar(filtrar(comandas, inicioMes)),
         ano: somar(filtrar(comandas, inicioAno)),
       }
+    });
+  };
+
+  const calcularValorFaturadoQuarto = (tempo) => {
+    if (tempo === '1 hora') return 100;
+    if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
+    return 0;
+  };
+
+  const calcularTotaisQuartos = (quartos) => {
+    const agora = new Date();
+    const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0);
+    const inicioSemana = new Date();
+    const diaSemana = inicioSemana.getDay();
+    const distSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+    inicioSemana.setDate(inicioSemana.getDate() - distSegunda);
+    inicioSemana.setHours(0, 0, 0, 0);
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const inicioAno = new Date(agora.getFullYear(), 0, 1);
+
+    const finalizados = quartos.filter((q) => q.status === 'finalizado' && q.encerradoEm);
+
+    const filtrar = (lista, data) => lista.filter((item) => new Date(item.encerradoEm) >= data);
+    const somar = (lista) => lista.reduce((acc, item) => acc + calcularValorFaturadoQuarto(item.tempo), 0);
+
+    setTotaisQuartos({
+      hoje: somar(filtrar(finalizados, inicioHoje)),
+      semana: somar(filtrar(finalizados, inicioSemana)),
+      mes: somar(filtrar(finalizados, inicioMes)),
+      ano: somar(filtrar(finalizados, inicioAno)),
     });
   };
 
@@ -150,6 +189,66 @@ function Relatorio() {
             <h5 style={{ color: '#00ff00', marginBottom: '10px' }}>Ano</h5>
             <p style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
               R$ {mostrarTotais ? totais.comandas.ano.toFixed(2) : '••••'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Seção de Totais - Quartos */}
+      <div style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        border: '2px solid #00ff00',
+        borderRadius: '12px',
+        padding: '25px',
+        marginBottom: '30px'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h4 style={{ color: '#00ff00', fontSize: '20px' }}>Quartos</h4>
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              if (!mostrarTotaisQuartos) {
+                const senha = prompt('Digite a senha para visualizar os valores:');
+                if (senha === 'admin123') {
+                  setMostrarTotaisQuartos(true);
+                }
+              } else {
+                setMostrarTotaisQuartos(false);
+              }
+            }}
+          >
+            {mostrarTotaisQuartos ? 'Ocultar' : '👁️ Ver'}
+          </button>
+        </div>
+
+        <div className="responsive-grid">
+          <div className="card">
+            <h5 style={{ color: '#00ff00', marginBottom: '10px' }}>Hoje</h5>
+            <p style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
+              R$ {mostrarTotaisQuartos ? totaisQuartos.hoje.toFixed(2) : '••••'}
+            </p>
+          </div>
+          <div className="card">
+            <h5 style={{ color: '#00ff00', marginBottom: '10px' }}>Semana</h5>
+            <p style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
+              R$ {mostrarTotaisQuartos ? totaisQuartos.semana.toFixed(2) : '••••'}
+            </p>
+          </div>
+          <div className="card">
+            <h5 style={{ color: '#00ff00', marginBottom: '10px' }}>Mês</h5>
+            <p style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
+              R$ {mostrarTotaisQuartos ? totaisQuartos.mes.toFixed(2) : '••••'}
+            </p>
+          </div>
+          <div className="card">
+            <h5 style={{ color: '#00ff00', marginBottom: '10px' }}>Ano</h5>
+            <p style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>
+              R$ {mostrarTotaisQuartos ? totaisQuartos.ano.toFixed(2) : '••••'}
             </p>
           </div>
         </div>

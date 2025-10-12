@@ -11,7 +11,6 @@ function Cronometro({ inicio, tempo, status }) {
       case '25 minutos': return 25 * 60;
       case '40 minutos': return 40 * 60;
       case '1 hora': return 60 * 60;
-      case 'tempo livre': return null; // sem limite
       default: return 0;
     }
   };
@@ -43,11 +42,7 @@ function Cronometro({ inicio, tempo, status }) {
   return (
     <div>
       <div className="progress-bar-container">
-        {limite ? (
-          <div className="progress-bar" style={{ width: `${progresso}%`, backgroundColor: estourado ? '#ff4d4f' : '#00ff00' }} />
-        ) : (
-          <div style={{ color: '#00ff00', fontWeight: 'bold' }}>Tempo Livre</div>
-        )}
+        <div className="progress-bar" style={{ width: `${limite ? progresso : 0}%`, backgroundColor: estourado ? '#ff4d4f' : '#00ff00' }} />
       </div>
       <div style={{ marginTop: 6, color: estourado ? '#ff4d4f' : '#00ff00', fontWeight: 'bold' }}>
         {formatar(segundos)} {limite ? ` / ${formatar(limite)}` : ''}
@@ -68,6 +63,12 @@ function Quartos() {
 
   const userId = localStorage.getItem('userId');
   const API = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/quartos`;
+
+  const calcularValorFaturado = (tempo) => {
+    if (tempo === '1 hora') return 100;
+    if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
+    return 0;
+  };
 
   const carregar = async () => {
     setLoading(true);
@@ -136,6 +137,8 @@ function Quartos() {
     return nome.includes(filtroNome.trim().toLowerCase());
   }));
 
+  const totalFaturadoFinalizados = finalizadosFiltrados.reduce((acc, q) => acc + calcularValorFaturado(q.tempo), 0);
+
   return (
     <ResponsiveLayout>
       <div className="page-header">
@@ -159,7 +162,6 @@ function Quartos() {
               <option>25 minutos</option>
               <option>40 minutos</option>
               <option>1 hora</option>
-              <option>tempo livre</option>
             </select>
           </div>
           <div className="form-group">
@@ -216,6 +218,7 @@ function Quartos() {
                 <div>
                   <p style={{ margin: 0 }}>Tempo: <strong>{q.tempo}</strong></p>
                   <p style={{ margin: 0 }}>Forma de Pagamento: <strong>{q.formaPagamento || '-'}</strong></p>
+                  <p style={{ margin: 0 }}>Valor faturado: <strong>R$ {calcularValorFaturado(q.tempo).toFixed(2)}</strong></p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <button className="btn-danger" onClick={() => finalizar(q.id)}>Finalizar</button>
@@ -257,6 +260,9 @@ function Quartos() {
             <div style={{ marginTop: 8, color: '#00ff00', fontWeight: 'bold' }}>
               Total encontrados: {finalizadosFiltrados.length}
             </div>
+            <div style={{ marginTop: 4, color: '#00ff00', fontWeight: 'bold' }}>
+              Total faturado: R$ {totalFaturadoFinalizados.toFixed(2)}
+            </div>
 
             <div className="responsive-grid" style={{ marginTop: 12 }}>
               {finalizadosFiltrados.length === 0 ? (
@@ -276,6 +282,7 @@ function Quartos() {
                       <div>
                         <p style={{ margin: 0 }}>Tempo: <strong>{q.tempo}</strong></p>
                         <p style={{ margin: 0 }}>Forma de Pagamento: <strong>{q.formaPagamento || '-'}</strong></p>
+                        <p style={{ margin: 0 }}>Valor faturado: <strong>R$ {calcularValorFaturado(q.tempo).toFixed(2)}</strong></p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <p style={{ margin: 0 }}>Duração: <strong>{formatDuration(q.criadaEm, q.encerradoEm)}</strong></p>
