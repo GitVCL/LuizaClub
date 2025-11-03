@@ -123,6 +123,15 @@ function Quartos() {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   }
 
+  function formatDateTime(dt) {
+    try {
+      const d = new Date(dt);
+      return d.toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dt || '-';
+    }
+  }
+
   // Filtro por data para itens finalizados
   const finalizados = quartos.filter(q => q.status === 'finalizado');
   const porData = (!filtroInicio && !filtroFim) ? finalizados : finalizados.filter(q => {
@@ -174,6 +183,7 @@ function Quartos() {
               <option>Dinheiro</option>
               <option>Cartão</option>
               <option>Pix</option>
+              <option>Pix pra ela</option>
             </select>
           </div>
           <div className="form-group">
@@ -286,6 +296,8 @@ function Quartos() {
                         <p style={{ margin: 0 }}>Tempo: <strong>{q.tempo}</strong></p>
                         <p style={{ margin: 0 }}>Forma de Pagamento: <strong>{q.formaPagamento || '-'}</strong></p>
                         <p style={{ margin: 0 }}>Valor faturado: <strong>R$ {calcularValorFaturado(q.tempo).toFixed(2)}</strong></p>
+                        <p style={{ margin: 0 }}>Criado em: <strong>{formatDateTime(q.criadaEm)}</strong></p>
+                        <p style={{ margin: 0 }}>Finalizado em: <strong>{formatDateTime(q.encerradoEm)}</strong></p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <p style={{ margin: 0 }}>Duração: <strong>{formatDuration(q.criadaEm, q.encerradoEm)}</strong></p>
