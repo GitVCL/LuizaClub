@@ -14,6 +14,7 @@ import Relatorio from './components/Pages/Relatorio.js'
 // import Finalizados from './components/Pages/Finalizados.js'; // removido
 import Drinks from './components/Pages/Drinks.js';
 import Quartos from './components/Pages/Quartos.js';
+import DrinksPublic from './components/Pages/DrinksPublic.js';
 
 
 function App() {
@@ -57,6 +58,8 @@ function App() {
           {/* <Route path="/finalizados" element={<Finalizados />} /> */}
           {/* Rota para Drinks */}
           <Route path="/drinks" element={<Drinks />} />
+          {/* Rota pública read-only para Drinks */}
+          <Route path="/drinks-public" element={<DrinksPublic />} />
           {/* Rota para Quartos */}
           <Route path="/quartos" element={<Quartos />} />
 

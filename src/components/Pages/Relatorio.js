@@ -88,6 +88,7 @@ function Relatorio() {
 
   const calcularValorFaturadoQuarto = (tempo) => {
     if (tempo === '1 hora') return 100;
+    if (tempo === '1 hora gringo') return 150;
     if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
     return 0;
   };

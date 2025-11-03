@@ -11,6 +11,7 @@ function Cronometro({ inicio, tempo, status }) {
       case '25 minutos': return 25 * 60;
       case '40 minutos': return 40 * 60;
       case '1 hora': return 60 * 60;
+      case '1 hora gringo': return 60 * 60;
       default: return 0;
     }
   };
@@ -66,6 +67,7 @@ function Quartos() {
 
   const calcularValorFaturado = (tempo) => {
     if (tempo === '1 hora') return 100;
+    if (tempo === '1 hora gringo') return 150;
     if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
     return 0;
   };
@@ -162,6 +164,7 @@ function Quartos() {
               <option>25 minutos</option>
               <option>40 minutos</option>
               <option>1 hora</option>
+              <option>1 hora gringo</option>
             </select>
           </div>
           <div className="form-group">
