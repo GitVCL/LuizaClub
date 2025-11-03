@@ -57,7 +57,7 @@ function Quartos() {
   const [form, setForm] = useState({ nome: '', tempo: '25 minutos', formaPagamento: '', quarto: '' });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [showFinalizados, setShowFinalizados] = useState(true);
+  const [showFinalizados, setShowFinalizados] = useState(false);
   const [filtroInicio, setFiltroInicio] = useState('');
   const [filtroFim, setFiltroFim] = useState('');
   const [filtroNome, setFiltroNome] = useState('');
