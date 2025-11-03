@@ -69,7 +69,7 @@ function DrinksPublic() {
     );
   }, [lista, filterFuncionario]);
 
-  const totalDrinks = useMemo(() => filtrada.reduce((acc, d) => acc + (d.quantidade || 0), 0), [filtrada]);
+  // Removido total de drinks da visualização pública conforme solicitação
 
   return (
     <div className="app-container">
@@ -77,6 +77,18 @@ function DrinksPublic() {
         <div className="page-header">
           <div className="page-title">🍹 Drinks (Visualização Pública)</div>
           <div className="header-actions">
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                try {
+                  window.location.reload();
+                } catch {
+                  // fallback silencioso
+                }
+              }}
+            >
+              Atualizar
+            </button>
             {/* Sem ações de alteração */}
             <span className="badge" style={{ background: 'rgba(0,255,0,0.15)', border: '1px solid rgba(0,255,0,0.35)', color: '#00ff00' }}>
               Somente leitura
@@ -84,15 +96,7 @@ function DrinksPublic() {
           </div>
         </div>
 
-        <div className="responsive-grid">
-          <div className="card fade-in" style={{ borderColor: 'rgba(0,255,0,0.4)' }}>
-            <div style={{ color: '#00ff00', fontWeight: 'bold' }}>Total de Drinks</div>
-            <div style={{ color: 'white', fontSize: 26, fontWeight: 'bold' }}>{totalDrinks}</div>
-            {filterFuncionario && (
-              <div style={{ color: '#aaa', marginTop: 6 }}>Filtrando por: {filterFuncionario}</div>
-            )}
-          </div>
-        </div>
+        {/* Card de Total de Drinks removido da visualização pública */}
 
         {errorMsg && (
           <div className="card fade-in" style={{ borderColor: 'rgba(255,0,0,0.4)', marginTop: 20 }}>
