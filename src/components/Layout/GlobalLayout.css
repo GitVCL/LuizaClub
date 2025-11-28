@@ -155,6 +155,24 @@ body {
   background: linear-gradient(45deg, #cc0000, #aa0000);
 }
 
+/* ===== Botão Azul ===== */
+.btn-blue {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-blue:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(45deg, #2563eb, #1e40af);
+}
+
 /* ===== CARDS E GRIDS ===== */
 .responsive-grid {
   display: grid;

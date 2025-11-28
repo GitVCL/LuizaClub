@@ -258,6 +258,42 @@
   background-color: #444;
 }
 
+/* Botão Azul */
+.btn-blue {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-blue:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(45deg, #2563eb, #1e40af);
+}
+
+/* Ações em linha para desktop */
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 1cm; /* desloca os botões para baixo no card (desktop) */
+}
+
+@media (max-width: 600px) {
+  .actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 12px; /* margem menor no mobile */
+  }
+}
+
 /* Modais Responsivos */
 .modal-overlay {
   position: fixed;

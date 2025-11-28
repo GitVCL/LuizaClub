@@ -28,6 +28,7 @@ function Relatorio() {
   const [horaInicio, setHoraInicio] = useState('00:00');
   const [horaFim, setHoraFim] = useState('23:59');
   const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
+  const [topProdutos, setTopProdutos] = useState([]);
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
 
@@ -38,6 +39,7 @@ function Relatorio() {
         const dadosComandas = await resComandas.json();
         setComandas(dadosComandas);
         calcularTotais(dadosComandas);
+        calcularTopProdutos(dadosComandas);
 
         const resQuartos = await fetch(`${API_BASE}/api/quartos/${userId}`);
         const dadosQuartos = await resQuartos.json();
@@ -84,6 +86,34 @@ function Relatorio() {
         ano: somar(filtrar(comandas, inicioAno)),
       }
     });
+  };
+
+  const calcularTopProdutos = (lista) => {
+    try {
+      // Considera apenas comandas finalizadas para vendas efetivas
+      const finalizadas = Array.isArray(lista) ? lista.filter(c => c.status === 'finalizada') : [];
+      const contador = new Map();
+
+      for (const c of finalizadas) {
+        const itens = Array.isArray(c.itens) ? c.itens : [];
+        for (const item of itens) {
+          const nome = item?.descricao || item?.nome || 'Desconhecido';
+          const qtd = Number(item?.qtd || 0);
+          if (!nome || qtd <= 0) continue;
+          contador.set(nome, (contador.get(nome) || 0) + qtd);
+        }
+      }
+
+      const ordenado = Array.from(contador.entries())
+        .map(([nome, qtd]) => ({ nome, qtd }))
+        .sort((a, b) => b.qtd - a.qtd)
+        .slice(0, 5);
+
+      setTopProdutos(ordenado);
+    } catch (e) {
+      console.error('Erro ao calcular top produtos:', e);
+      setTopProdutos([]);
+    }
   };
 
   const calcularValorFaturadoQuarto = (tempo) => {
@@ -325,6 +355,32 @@ function Relatorio() {
             </AreaChart>
           </div>
         </div>
+      </div>
+
+      {/* Top 5 Produtos Mais Vendidos */}
+      <div style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        border: '2px solid #00ff00',
+        borderRadius: '12px',
+        padding: '25px',
+        marginBottom: '30px'
+      }}>
+        <h3 style={{ color: '#00ff00', marginBottom: '20px', fontSize: '22px' }}>
+          Top 5 Produtos Mais Vendidos
+        </h3>
+        {topProdutos.length === 0 ? (
+          <div className="card">Nenhuma venda finalizada registrada</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+            {topProdutos.map((p, idx) => (
+              <div key={p.nome} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ color: '#00ff00', fontWeight: 'bold' }}>#{idx + 1}</div>
+                <div style={{ color: 'white', fontWeight: 'bold' }}>{p.nome}</div>
+                <div style={{ color: '#00ff00' }}>{p.qtd}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Seção de Busca por Período */}
