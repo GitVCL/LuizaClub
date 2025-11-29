@@ -56,6 +56,7 @@ function Quartos() {
   const [quartos, setQuartos] = useState([]);
   const [form, setForm] = useState({ nome: '', tempo: '25 minutos', formaPagamento: '', quarto: '' });
   const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showFinalizados, setShowFinalizados] = useState(false);
   const [filtroInicio, setFiltroInicio] = useState('');
@@ -83,6 +84,7 @@ function Quartos() {
   const calcularValorFaturado = (tempo) => {
     if (tempo === '1 hora') return 100;
     if (tempo === '1 hora gringo') return 150;
+    if (tempo === 'pernoite') return 300;
     if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
     return 0;
   };
@@ -149,6 +151,8 @@ function Quartos() {
   useEffect(() => { carregar(); }, []);
 
   const criar = async () => {
+    if (creating) return; // evita double-click
+    setCreating(true);
     try {
       // Bloqueio de quarto já em uso
       const ativosEmUso = new Set(
@@ -156,10 +160,12 @@ function Quartos() {
       );
       if (!form.quarto) {
         alert('Selecione um quarto');
+        setCreating(false);
         return;
       }
       if (ativosEmUso.has(form.quarto)) {
         alert('Este quarto está em uso. Selecione outro.');
+        setCreating(false);
         return;
       }
 
@@ -171,6 +177,8 @@ function Quartos() {
     } catch (err) {
       console.error(err);
       alert('Erro ao criar quarto');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -380,16 +388,15 @@ function Quartos() {
               <option>40 minutos</option>
               <option>1 hora</option>
               <option>1 hora gringo</option>
+              <option>pernoite</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Forma de Pagamento</label>
             <select className="form-input" value={form.formaPagamento} onChange={e => setForm({ ...form, formaPagamento: e.target.value })}>
               <option value="">Selecione</option>
-              <option>Dinheiro</option>
-              <option>Cartão</option>
-              <option>Pix</option>
-              <option>Pix pra ela</option>
+              <option>Para ela</option>
+              <option>Para casa</option>
             </select>
           </div>
           <div className="form-group">
@@ -409,7 +416,9 @@ function Quartos() {
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
-          <button className="btn-primary" onClick={criar}>Criar Card</button>
+          <button className="btn-primary" onClick={criar} disabled={creating} aria-busy={creating}>
+            {creating ? 'Criando...' : 'Criar Card'}
+          </button>
         </div>
       </div>
 
