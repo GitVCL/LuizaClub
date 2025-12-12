@@ -21,9 +21,15 @@ function Cardapio() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        setItens(data);
+        if (Array.isArray(data)) {
+          setItens(data);
+        } else {
+          console.error('Resposta da API não é uma lista:', data);
+          setItens([]);
+        }
       } catch (err) {
         console.error('Erro ao buscar produtos:', err);
+        setItens([]);
       }
     };
     fetchProdutos();
@@ -199,7 +205,7 @@ function Cardapio() {
 
       {/* Grid responsivo de produtos */}
       <div className="responsive-grid">
-        {itens.map((item) => (
+        {Array.isArray(itens) && itens.map((item) => (
           <div key={item.id} className="card">
             <h3 style={{ 
               color: '#00ff00', 
@@ -223,7 +229,7 @@ function Cardapio() {
               <strong>Unidades:</strong> {item.unidades}
             </p>
             
-            {item.variantes && item.variantes.length > 0 && (
+            {Array.isArray(item.variantes) && item.variantes.length > 0 && (
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ 
                   color: '#00ff00', 

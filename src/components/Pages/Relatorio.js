@@ -53,7 +53,7 @@ function Relatorio() {
     fetchData();
   }, []);
 
-  const dadosComandas = comandas.map((c) => ({ nome: c.nome, total: c.total }));
+  const dadosComandas = Array.isArray(comandas) ? comandas.map((c) => ({ nome: c.nome, total: c.total })) : [];
   const ultimas10Comandas = dadosComandas.slice(-10);
 
   const calcularTotais = (comandas) => {
