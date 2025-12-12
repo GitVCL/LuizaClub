@@ -28,7 +28,6 @@ function Relatorio() {
   const [horaInicio, setHoraInicio] = useState('00:00');
   const [horaFim, setHoraFim] = useState('23:59');
   const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
-  const [totalQuartosPorPeriodo, setTotalQuartosPorPeriodo] = useState(null);
   const [topProdutos, setTopProdutos] = useState([]);
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
@@ -156,27 +155,11 @@ function Relatorio() {
       const res = await fetch(`${API_BASE}/api/relatorios/periodo?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}&userId=${userId}`);
       const data = await res.json();
 
-      // Suporte para nova estrutura { comandas, quartos }
-      const comandas = data.comandas || (Array.isArray(data) ? data : []);
-      const quartos = data.quartos || [];
-
-      const total = comandas.reduce((acc, item) => acc + Number(item.total || 0), 0);
+      const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);
       setTotalPorPeriodo(total);
-
-      // Calcular total de quartos
-      const totalQuartos = quartos.reduce((acc, q) => {
-        // Tenta usar o valor salvo primeiro
-        const v = typeof q?.valor === 'number' ? q.valor : null;
-        if (v !== null && v > 0) return acc + v;
-        // Fallback para cálculo por tempo
-        return acc + calcularValorFaturadoQuarto(q.tempo);
-      }, 0);
-      setTotalQuartosPorPeriodo(totalQuartos);
-
     } catch (err) {
       console.error('Erro ao buscar finalizados por período:', err);
       setTotalPorPeriodo(null);
-      setTotalQuartosPorPeriodo(null);
     }
   };
 
@@ -533,7 +516,7 @@ function Relatorio() {
            </div>
         </div>
         
-        {(totalPorPeriodo !== null || totalQuartosPorPeriodo !== null) && (
+        {totalPorPeriodo !== null && (
           <div style={{
             marginTop: '20px',
             padding: '15px',
@@ -542,16 +525,9 @@ function Relatorio() {
             borderRadius: '8px',
             textAlign: 'center'
           }}>
-            {totalPorPeriodo !== null && (
-              <h4 style={{ color: '#00ff00', marginBottom: '10px' }}>
-                Comandas (Período): R$ {totalPorPeriodo.toFixed(2)}
-              </h4>
-            )}
-            {totalQuartosPorPeriodo !== null && (
-              <h4 style={{ color: '#00ff00', margin: 0 }}>
-                Quartos (Período): R$ {totalQuartosPorPeriodo.toFixed(2)}
-              </h4>
-            )}
+            <h4 style={{ color: '#00ff00', margin: 0 }}>
+              Período Selecionado: R$ {totalPorPeriodo.toFixed(2)}
+            </h4>
           </div>
         )}
       </div>

@@ -60,7 +60,9 @@ function Quartos() {
   const [errorMsg, setErrorMsg] = useState('');
   const [showFinalizados, setShowFinalizados] = useState(false);
   const [filtroInicio, setFiltroInicio] = useState('');
+  const [filtroHoraInicio, setFiltroHoraInicio] = useState('00:00');
   const [filtroFim, setFiltroFim] = useState('');
+  const [filtroHoraFim, setFiltroHoraFim] = useState('23:59');
   const [filtroNome, setFiltroNome] = useState('');
 
   // Fallback de userId para ambiente de desenvolvimento
@@ -351,8 +353,13 @@ function Quartos() {
   const porData = (!filtroInicio && !filtroFim) ? finalizados : finalizados.filter(q => {
     if (!q.encerradoEm) return false;
     const encerrado = new Date(q.encerradoEm);
-    const inicio = filtroInicio ? new Date(`${filtroInicio}T00:00:00`) : null;
-    const fim = filtroFim ? new Date(`${filtroFim}T23:59:59`) : null;
+
+    const hInicio = filtroHoraInicio || '00:00';
+    const hFim = filtroHoraFim || '23:59';
+
+    const inicio = filtroInicio ? new Date(`${filtroInicio}T${hInicio}:00`) : null;
+    const fim = filtroFim ? new Date(`${filtroFim}T${hFim}:59`) : null;
+
     if (inicio && encerrado < inicio) return false;
     if (fim && encerrado > fim) return false;
     return true;
@@ -481,19 +488,31 @@ function Quartos() {
           <>
             <div className="form-grid" style={{ marginTop: 12 }}>
               <div className="form-group">
-                <label className="form-label">Data Início</label>
-                <input type="date" className="form-input" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} />
+                <label className="form-label">Início (Data/Hora)</label>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  <input type="date" className="form-input" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} />
+                  <input type="time" className="form-input" value={filtroHoraInicio} onChange={e => setFiltroHoraInicio(e.target.value)} />
+                </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Data Fim</label>
-                <input type="date" className="form-input" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} />
+                <label className="form-label">Fim (Data/Hora)</label>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  <input type="date" className="form-input" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} />
+                  <input type="time" className="form-input" value={filtroHoraFim} onChange={e => setFiltroHoraFim(e.target.value)} />
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">Buscar por Nome</label>
                 <input type="text" className="form-input" placeholder="Ex: Maria" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} />
               </div>
               <div className="form-group" style={{ alignSelf: 'end' }}>
-                <button className="btn-secondary" onClick={() => { setFiltroInicio(''); setFiltroFim(''); setFiltroNome(''); }}>Limpar Filtro</button>
+                <button className="btn-secondary" onClick={() => { 
+                  setFiltroInicio(''); 
+                  setFiltroHoraInicio('00:00');
+                  setFiltroFim(''); 
+                  setFiltroHoraFim('23:59');
+                  setFiltroNome(''); 
+                }}>Limpar Filtro</button>
               </div>
             </div>
 
