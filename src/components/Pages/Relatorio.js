@@ -8,7 +8,7 @@ import {
 import ResponsiveLayout from '../Layout/ResponsiveLayout';
 import '../GlobalLayout.css';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 function Relatorio() {
   const navigate = useNavigate();

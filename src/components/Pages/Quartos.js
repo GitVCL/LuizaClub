@@ -70,15 +70,15 @@ function Quartos() {
   // Base da API configurável por env, com fallback para localhost
   // Protege contra apontar acidentalmente para a porta do frontend (3001)
   const API_BASE = (() => {
-    const base = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+    const base = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
     try {
       const u = new URL(base);
       if (u.port === '3001') {
-        return 'http://localhost:5000';
+        return 'http://localhost:3000';
       }
       return base;
     } catch {
-      return 'http://localhost:5000';
+      return 'http://localhost:3000';
     }
   })();
   const API = `${API_BASE}/api/quartos`;
@@ -165,7 +165,7 @@ function Quartos() {
         setCreating(false);
         return;
       }
-      if (ativosEmUso.has(form.quarto)) {
+      if (ativosEmUso.has(form.quarto) && form.quarto !== 'Quarto Repetido') {
         alert('Este quarto está em uso. Selecione outro.');
         setCreating(false);
         return;
@@ -225,7 +225,7 @@ function Quartos() {
         // Fallback: se recebeu 404 em HTML (tipicamente vindo do dev-server do frontend), tenta direto no backend
         const shouldRetryToBackend = res.status === 404 && contentType.includes('text/html') || (text || '').toLowerCase().includes('cannot patch');
         if (shouldRetryToBackend) {
-          const fallbackUrl = `http://localhost:5000/api/quartos/${encodeURIComponent(id)}/cancelar`;
+          const fallbackUrl = `http://localhost:3000/api/quartos/${encodeURIComponent(id)}/cancelar`;
           console.log('Tentando fallback para backend:', fallbackUrl);
           res = await fetch(fallbackUrl, { method: 'PATCH' });
         }
@@ -419,6 +419,9 @@ function Quartos() {
                   </option>
                 );
               })}
+              <option value="Quarto Repetido">
+                 Quarto Repetido
+               </option>
             </select>
           </div>
         </div>

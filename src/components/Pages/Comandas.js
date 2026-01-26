@@ -5,7 +5,7 @@ import '../GlobalLayout.css';
 import ProductSearch from '../ProductSearch';
 import html2pdf from 'html2pdf.js';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const Comandas = () => {
   const navigate = useNavigate();

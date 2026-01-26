@@ -133,7 +133,7 @@ function Drinks() {
 
   async function addUm(id) {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/drinks/${id}/add`, { method: 'PATCH' });
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/api/drinks/${id}/add`, { method: 'PATCH' });
       if (!res.ok) throw new Error('Erro ao adicionar');
       await carregar();
     } catch (err) {
