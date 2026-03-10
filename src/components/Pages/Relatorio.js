@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
@@ -11,12 +10,11 @@ import '../GlobalLayout.css';
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 function Relatorio() {
-  const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
 
   const [comandas, setComandas] = useState([]);
   // Quartos
-  const [quartos, setQuartos] = useState([]);
+  const [quartos, setQuartos] = useState([]); // eslint-disable-line no-unused-vars
   const [totaisQuartos, setTotaisQuartos] = useState({ hoje: 0, semana: 0, mes: 0, ano: 0 });
   const [mostrarTotaisQuartos, setMostrarTotaisQuartos] = useState(false);
   const [totais, setTotais] = useState({
@@ -51,7 +49,7 @@ function Relatorio() {
     };
 
     fetchData();
-  }, []);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dadosComandas = Array.isArray(comandas) ? comandas.map((c) => ({ nome: c.nome, total: c.total })) : [];
   const ultimas10Comandas = dadosComandas.slice(-10);

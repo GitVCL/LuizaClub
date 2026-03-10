@@ -21,7 +21,6 @@ function Drinks() {
   const [loading, setLoading] = useState(false);
   const [produtos, setProdutos] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
-  const [drinksAbertos, setDrinksAbertos] = useState({});
   const [drinkAberta, setDrinkAberta] = useState(null);
   const [form, setForm] = useState({
     funcionaria: '',
@@ -38,7 +37,7 @@ function Drinks() {
     }
     carregar();
     carregarProdutos();
-  }, []);
+  }, [userId, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mantém o modal sincronizado com dados atualizados
   useEffect(() => {
@@ -51,7 +50,7 @@ function Drinks() {
         setDrinkAberta(null);
       }
     }
-  }, [lista]);
+  }, [lista, drinkAberta]);
 
   async function carregar() {
     try {
@@ -250,12 +249,6 @@ function Drinks() {
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const totalDrinks = lista.reduce((acc, d) => acc + (d.quantidade || 0), 0);
-  const totalComissao = lista.reduce((acc, d) => acc + calcComissao(d.quantidade || 0, d.meta || 20), 0);
-  const totalConsumoAll = lista.reduce((acc, d) => acc + totalConsumo(d), 0);
-
-  function toggleDrinkAberto(id) {
-    setDrinksAbertos(prev => ({ ...prev, [id]: !prev[id] }));
-  }
 
   function abrirDrink(drink) {
     setDrinkAberta(drink);

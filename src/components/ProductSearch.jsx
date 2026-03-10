@@ -50,6 +50,8 @@ const ProductSearch = ({ produtos, onAddProduct }) => {
         setIsOpen(false);
         setSelectedIndex(-1);
         break;
+      default:
+        break;
     }
   };
 

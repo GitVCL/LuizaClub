@@ -17,7 +17,6 @@ function Cronometro({ inicio, tempo, status }) {
   };
 
   useEffect(() => {
-    const limite = mapTempoParaSegundos(tempo);
     const inicioDate = inicio ? new Date(inicio) : new Date();
 
     intervalRef.current = setInterval(() => {
@@ -64,6 +63,8 @@ function Quartos() {
   const [filtroFim, setFiltroFim] = useState('');
   const [filtroHoraFim, setFiltroHoraFim] = useState('23:59');
   const [filtroNome, setFiltroNome] = useState('');
+  const [filtroQuarto, setFiltroQuarto] = useState(''); // eslint-disable-line no-unused-vars
+  const [limite] = useState(10); // eslint-disable-line no-unused-vars
 
   // Fallback de userId para ambiente de desenvolvimento
   const userId = localStorage.getItem('userId') || 'dev-user';
@@ -150,7 +151,7 @@ function Quartos() {
     }
   };
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => { carregar(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const criar = async () => {
     if (creating) return; // evita double-click
@@ -210,7 +211,6 @@ function Quartos() {
       // Snapshot para possível rollback se falhar
       const alvo = quartos.find(q => (q.id === id) || (q._id === id));
       const prevValor = alvo?.valor;
-      const prevObs = alvo?.observacoes || '';
       // Atualização otimista: zera apenas o valor, mantém demais informações
       setQuartos(prev => prev.map(q => {
         const match = (q.id === id) || (q._id === id);
@@ -223,7 +223,7 @@ function Quartos() {
         const text = await res.text();
         console.warn('Primeira tentativa falhou:', { status: res.status, contentType, preview: text.slice(0, 120) });
         // Fallback: se recebeu 404 em HTML (tipicamente vindo do dev-server do frontend), tenta direto no backend
-        const shouldRetryToBackend = res.status === 404 && contentType.includes('text/html') || (text || '').toLowerCase().includes('cannot patch');
+        const shouldRetryToBackend = (res.status === 404 && contentType.includes('text/html')) || (text || '').toLowerCase().includes('cannot patch');
         if (shouldRetryToBackend) {
           const fallbackUrl = `http://localhost:3000/api/quartos/${encodeURIComponent(id)}/cancelar`;
           console.log('Tentando fallback para backend:', fallbackUrl);
@@ -248,52 +248,6 @@ function Quartos() {
       alert('Falha ao cancelar quarto. Os valores anteriores foram restaurados.');
       // Em erro inesperado, força recarregar para garantir consistência
       await carregar();
-    }
-  };
-
-  const excluir = async (id) => {
-    const confirmar = window.confirm('Tem certeza que deseja excluir este quarto? Esta ação é permanente.');
-    if (!confirmar) return;
-    if (!id) {
-      console.error('Excluir chamado sem id válido');
-      alert('ID do quarto inválido. Atualize a página e tente novamente.');
-      return;
-    }
-    try {
-      const alvo = quartos.find(q => (q.id === id) || (q._id === id));
-      const quartoParam = alvo?.quarto ? `&quarto=${encodeURIComponent(alvo.quarto)}` : '';
-      const url = `${API}/${id}?userId=${encodeURIComponent(userId || '')}${quartoParam}`;
-      console.log('Enviando DELETE para:', url);
-      const res = await fetch(url, { method: 'DELETE' });
-      if (!res.ok) {
-        const contentType = res.headers.get('Content-Type') || '';
-        let mensagem = `Erro ao excluir (HTTP ${res.status})`;
-        if (contentType.includes('application/json')) {
-          try {
-            const erro = await res.json();
-            mensagem = erro?.error ? `${mensagem}: ${erro.error}` : mensagem;
-          } catch (e) {
-            console.warn('Falha ao ler corpo de erro JSON do DELETE /quartos:', e);
-          }
-        } else {
-          try {
-            const texto = await res.text();
-            console.warn('Resposta não-JSON do DELETE /quartos (parcial):', texto.slice(0, 200));
-            mensagem = `${mensagem} — resposta não-JSON`;
-          } catch (e) {
-            console.warn('Falha ao ler corpo de erro (texto) do DELETE /quartos:', e);
-          }
-        }
-        console.error('Falha DELETE /quartos:', { url, status: res.status, contentType, mensagem });
-        alert(mensagem);
-        return;
-      }
-      console.log('Quarto excluído com sucesso:', id);
-      // Remoção imediata do card no frontend
-      setQuartos(prev => prev.filter(q => (q.id !== id) && (q._id !== id)));
-    } catch (err) {
-      console.error('Erro ao excluir quarto:', err);
-      alert(`Falha ao excluir quarto: ${err?.message || 'Tente novamente.'}`);
     }
   };
 

@@ -18,10 +18,10 @@ import DrinksPublic from './components/Pages/DrinksPublic.js';
 
 
 function App() {
-  const [metas, setMetas] = useState({
-    study: 5,
-    leisure: 5,
-    dev: 5,
+  const [metas] = useState({
+    drinks: 20,
+    drinksSexta: 30,
+    drinksSabado: 40
   });
 
   return (

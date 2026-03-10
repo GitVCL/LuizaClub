@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import ResponsiveLayout from '../Layout/ResponsiveLayout';
 import '../GlobalLayout.css';
 import ProductSearch from '../ProductSearch';
-import html2pdf from 'html2pdf.js';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const Comandas = () => {
-  const navigate = useNavigate();
   const [comandas, setComandas] = useState([]);
   const [comandaAberta, setComandaAberta] = useState(null);
   const [valorTotal, setValorTotal] = useState(0);
@@ -481,14 +478,6 @@ const handleSelectGirlForCommission = async (girl) => {
   };
 };
 
-
-  const atualizarDono = (novoNome) => {
-    setDono(novoNome);
-    const comAtualizada = { ...comandaAberta, dono: novoNome };
-    setComandaAberta(comAtualizada);
-    setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
-    salvarComandaNoBanco(comAtualizada);
-  };
 
   const confirmarExclusaoComanda = () => {
   setModalExcluir(true);

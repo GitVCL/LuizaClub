@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const LoginCodeRequest = () => {
-  const [email, setEmail] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [email, setEmail] = useState(''); // eslint-disable-line no-unused-vars
+  const [mensagem, setMensagem] = useState(''); // eslint-disable-line no-unused-vars
   const navigate = useNavigate();
 
-  const solicitarCodigo = async () => {
+  const solicitarCodigo = async () => { // eslint-disable-line no-unused-vars
     try {
       const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/api/auth/login/send-code`, {
         method: 'POST',

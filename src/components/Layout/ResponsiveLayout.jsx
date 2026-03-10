@@ -55,11 +55,11 @@ const ResponsiveLayout = ({ children, title }) => {
     }
   };
 
-  const toggleSidebar = () => {
+  const toggleSidebar = () => { // eslint-disable-line no-unused-vars
     setSidebarOpen(!sidebarOpen);
   };
 
-  const closeSidebar = () => {
+  const closeSidebar = () => { // eslint-disable-line no-unused-vars
     setSidebarOpen(false);
   };
 

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import ResponsiveLayout from '../Layout/ResponsiveLayout';
 import '../GlobalLayout.css';
 
 function Cardapio() {
-  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
   const [novoItem, setNovoItem] = useState({
@@ -37,7 +35,7 @@ function Cardapio() {
       }
     };
     fetchProdutos();
-  }, [userId]);
+  }, [userId, API_URL]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
