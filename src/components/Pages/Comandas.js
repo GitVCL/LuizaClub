@@ -24,12 +24,29 @@ const Comandas = () => {
   const [filtroInicio, setFiltroInicio] = useState('');
   const [filtroFim, setFiltroFim] = useState('');
   const [filtroNome, setFiltroNome] = useState('');
+  const [activeGirls, setActiveGirls] = useState([]);
+  const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
+  const [pendingCommissionItem, setPendingCommissionItem] = useState(null);
 
 
   useEffect(() => {
     carregarComandas();
     carregarProdutos();
+    carregarMeninas();
   }, []);
+
+  const carregarMeninas = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const res = await fetch(`${API_BASE}/api/drinks/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setActiveGirls(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar meninas:', err);
+    }
+  };
 
   const carregarComandas = async () => {
     try {
@@ -67,7 +84,9 @@ const Comandas = () => {
 
   const carregarProdutos = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/produtos`);
+      const userId = localStorage.getItem('userId');
+      const url = userId ? `${API_BASE}/api/produtos?userId=${userId}` : `${API_BASE}/api/produtos`;
+      const res = await fetch(url);
       const data = await res.json();
       setProdutos(data);
     } catch (err) {
@@ -156,6 +175,16 @@ const Comandas = () => {
   };
 
   const adicionarItem = (produto) => {
+    if (produto.comissionado) {
+      setPendingCommissionItem({
+        descricao: produto.nome,
+        valorUnit: produto.valor,
+        comissionado: true
+      });
+      setIsCommissionModalOpen(true);
+      return;
+    }
+
     const itemExistente = itens.find(item => item.descricao === produto.nome);
     let novosItens;
 
@@ -169,7 +198,8 @@ const Comandas = () => {
       novosItens = [...itens, {
         descricao: produto.nome,
         qtd: 1,
-        valorUnit: produto.valor
+        valorUnit: produto.valor,
+        comissionado: !!produto.comissionado
       }];
     }
 
@@ -184,6 +214,13 @@ const Comandas = () => {
   };
 
   const adicionarQuantidade = (idx) => {
+    const item = itens[idx];
+    if (item.comissionado) {
+      setPendingCommissionItem(item);
+      setIsCommissionModalOpen(true);
+      return;
+    }
+
     const novosItens = [...itens];
     novosItens[idx].qtd += 1;
     const novoTotal = valorTotal + novosItens[idx].valorUnit;
@@ -242,8 +279,71 @@ const Comandas = () => {
 };
 
 
-const exportarPDF = () => {
-  if (!comandaAberta) return alert('Comanda não encontrada.');
+const handleSelectGirlForCommission = async (girl) => {
+    if (!pendingCommissionItem) return;
+
+    try {
+      // 1. Registrar o drink para a funcionária (Ação de bastidores)
+      const resDrink = await fetch(`${API_BASE}/api/drinks/${girl.id}/add`, {
+        method: 'PATCH'
+      });
+
+      if (!resDrink.ok) {
+        alert('Erro ao registrar comissão para a funcionária.');
+        return;
+      }
+
+      // 2. Adicionar o item à comanda (Sem o nome da menina na descrição)
+      const descricaoFinal = pendingCommissionItem.descricao;
+      const itemExistente = itens.find(item => item.descricao === descricaoFinal);
+      let novosItens;
+
+      if (itemExistente) {
+        novosItens = itens.map(item =>
+          item.descricao === descricaoFinal
+            ? { ...item, qtd: item.qtd + 1 }
+            : item
+        );
+      } else {
+        novosItens = [...itens, {
+          descricao: descricaoFinal,
+          qtd: 1,
+          valorUnit: pendingCommissionItem.valorUnit,
+          comissionado: true
+        }];
+      }
+
+      const novoTotal = novosItens.reduce((acc, item) => acc + item.qtd * item.valorUnit, 0);
+      
+      // Atualizar estados locais
+      setItens(novosItens);
+      setValorTotal(novoTotal);
+
+      // Atualizar a comanda específica que está aberta
+      const comAtualizada = { ...comandaAberta, itens: novosItens, total: novoTotal };
+      setComandaAberta(comAtualizada);
+      
+      // Atualizar na lista geral de comandas
+      setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
+      
+      // Salvar no banco de dados
+      await salvarComandaNoBanco(comAtualizada);
+
+      // 3. Fechar modal e limpar estado
+      setIsCommissionModalOpen(false);
+      setPendingCommissionItem(null);
+      
+      // Atualiza a lista de meninas para refletir a nova contagem
+      carregarMeninas();
+
+    } catch (err) {
+      console.error('Erro ao processar comissão:', err);
+      alert('Erro ao processar comissão.');
+    }
+  };
+
+  const exportarPDF = () => {
+    if (!comandaAberta) return alert('Comanda não encontrada.');
 
   // Cria uma nova janela para impressão
   const printWindow = window.open('', '_blank');
@@ -1047,6 +1147,95 @@ const excluirComandaConfirmada = async () => {
         )}
       </div>
       </>
+      {/* Modal de Comissão (Quem está tomando) */}
+      {isCommissionModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 2000, // Z-index bem alto para sobrepor a comanda
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#1a1a1a',
+            border: '2px solid #00ff00',
+            borderRadius: '15px',
+            padding: '30px',
+            width: '100%',
+            maxWidth: '500px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(0, 255, 0, 0.2)'
+          }}>
+            <h2 style={{ color: '#00ff00', marginBottom: '25px', fontSize: '24px' }}>
+              Quem está tomando?
+            </h2>
+            <p style={{ color: 'white', marginBottom: '20px', fontSize: '18px' }}>
+              Selecione a funcionária para registrar a comissão:<br/>
+              <strong style={{ color: '#00ff00' }}>{pendingCommissionItem?.descricao}</strong>
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '15px',
+              maxHeight: '350px',
+              overflowY: 'auto',
+              padding: '10px'
+            }}>
+              {activeGirls.length > 0 ? (
+                activeGirls.map(girl => (
+                  <button
+                    key={girl.id}
+                    onClick={() => handleSelectGirlForCommission(girl)}
+                    style={{
+                      padding: '15px',
+                      backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                      border: '1px solid #00ff00',
+                      borderRadius: '8px',
+                      color: '#00ff00',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      transition: '0.3s',
+                      fontWeight: 'bold'
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(0, 255, 0, 0.3)'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'}
+                  >
+                    {girl.funcionaria}
+                  </button>
+                ))
+              ) : (
+                <p style={{ color: '#ff4444', gridColumn: 'span 2' }}>
+                  Nenhuma funcionária registrada na página de Drinks!
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={() => {
+                setIsCommissionModalOpen(false);
+                setPendingCommissionItem(null);
+              }}
+              style={{
+                marginTop: '30px',
+                padding: '12px 30px',
+                backgroundColor: 'transparent',
+                border: '1px solid #ff4444',
+                color: '#ff4444',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </ResponsiveLayout>
   );
 };

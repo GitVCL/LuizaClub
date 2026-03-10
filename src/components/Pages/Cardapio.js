@@ -6,11 +6,13 @@ import '../GlobalLayout.css';
 function Cardapio() {
   const navigate = useNavigate();
   const [itens, setItens] = useState([]);
+  const [editandoId, setEditandoId] = useState(null);
   const [novoItem, setNovoItem] = useState({
     nome: '',
     valor: '',
     unidades: '',
-    variantes: ''
+    variantes: '',
+    comissionado: false
   });
 
   const API_URL = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/api/produtos`;
@@ -19,7 +21,9 @@ function Cardapio() {
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
-        const res = await fetch(API_URL);
+        const url = userId ? `${API_URL}?userId=${userId}` : API_URL;
+        console.log('Buscando produtos de:', url);
+        const res = await fetch(url);
         const data = await res.json();
         if (Array.isArray(data)) {
           setItens(data);
@@ -33,11 +37,14 @@ function Cardapio() {
       }
     };
     fetchProdutos();
-  }, []);
+  }, [userId]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNovoItem({ ...novoItem, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setNovoItem({ 
+      ...novoItem, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
 
   const handleAdicionarItem = async () => {
@@ -50,35 +57,76 @@ function Cardapio() {
       return;
     }
 
-    const novo = {
+    const payload = {
       nome,
       valor,
       unidades,
       variantes: novoItem.variantes
-        ? novoItem.variantes.split(',').map((v) => v.trim())
+        ? (Array.isArray(novoItem.variantes) ? novoItem.variantes : novoItem.variantes.split(',').map((v) => v.trim()))
         : [],
+      comissionado: novoItem.comissionado,
       userId
     };
 
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
+      const method = editandoId ? 'PUT' : 'POST';
+      const url = editandoId ? `${API_URL}/${editandoId}` : API_URL;
+
+      const res = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(novo)
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setItens([data, ...itens]);
-        setNovoItem({ nome: '', valor: '', unidades: '', variantes: '' });
+        if (editandoId) {
+          setItens(itens.map(item => item.id === editandoId ? data : item));
+          setEditandoId(null);
+          alert('Produto atualizado com sucesso!');
+        } else {
+          setItens([data, ...itens]);
+          alert('Produto adicionado com sucesso!');
+        }
+        
+        setNovoItem({ 
+          nome: '', 
+          valor: '', 
+          unidades: '', 
+          variantes: '',
+          comissionado: false 
+        });
       } else {
         console.error('Erro ao salvar:', data);
-        alert('Erro ao adicionar produto.');
+        alert('Erro ao salvar produto.');
       }
     } catch (err) {
-      console.error('Erro ao adicionar:', err);
+      console.error('Erro ao processar:', err);
     }
+  };
+
+  const handleEditarItem = (item) => {
+    setEditandoId(item.id);
+    setNovoItem({
+      nome: item.nome,
+      valor: item.valor,
+      unidades: item.unidades,
+      variantes: Array.isArray(item.variantes) ? item.variantes.join(', ') : '',
+      comissionado: !!item.comissionado
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelarEdicao = () => {
+    setEditandoId(null);
+    setNovoItem({ 
+      nome: '', 
+      valor: '', 
+      unidades: '', 
+      variantes: '',
+      comissionado: false 
+    });
   };
 
   const handleExcluirItem = async (id) => {
@@ -112,7 +160,7 @@ function Cardapio() {
           marginBottom: '20px',
           fontSize: '22px'
         }}>
-          Cadastrar novo item no cardápio
+          {editandoId ? 'Editar item do cardápio' : 'Cadastrar novo item no cardápio'}
         </h2>
 
         <div style={{ 
@@ -181,15 +229,43 @@ function Cardapio() {
               fontSize: '16px'
             }}
           />
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
+            color: '#00ff00' 
+          }}>
+            <input
+              type="checkbox"
+              name="comissionado"
+              checked={novoItem.comissionado}
+              onChange={handleChange}
+              id="comissionado-check"
+              style={{ width: '20px', height: '20px' }}
+            />
+            <label htmlFor="comissionado-check">Produto com comissão?</label>
+          </div>
         </div>
         
-        <button 
-          className="btn-primary"
-          onClick={handleAdicionarItem}
-          style={{ width: '100%' }}
-        >
-          Adicionar Produto
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="btn-primary"
+            onClick={handleAdicionarItem}
+            style={{ flex: 2 }}
+          >
+            {editandoId ? 'Salvar Alterações' : 'Adicionar Produto'}
+          </button>
+          
+          {editandoId && (
+            <button 
+              className="btn-secondary"
+              onClick={cancelarEdicao}
+              style={{ flex: 1 }}
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Título do estoque */}
@@ -229,6 +305,17 @@ function Cardapio() {
               <strong>Unidades:</strong> {item.unidades}
             </p>
             
+            {item.comissionado && (
+              <p style={{ 
+                color: '#ffff00', 
+                fontWeight: 'bold', 
+                fontSize: '14px',
+                marginBottom: '15px'
+              }}>
+                💰 Produto Comissionado
+              </p>
+            )}
+            
             {Array.isArray(item.variantes) && item.variantes.length > 0 && (
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ 
@@ -250,25 +337,47 @@ function Cardapio() {
               </div>
             )}
             
-            <button
-              style={{
-                backgroundColor: '#ff4444',
-                color: 'white',
-                border: 'none',
-                padding: '10px 15px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                width: '100%',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={() => handleExcluirItem(item.id)}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#cc3333'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#ff4444'}
-            >
-              🗑️ Excluir
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                style={{
+                  backgroundColor: '#00ff00',
+                  color: 'black',
+                  border: 'none',
+                  padding: '10px 15px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  flex: 1,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => handleEditarItem(item)}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#00cc00'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#00ff00'}
+              >
+                ✏️ Editar
+              </button>
+              
+              <button
+                style={{
+                  backgroundColor: '#ff4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 15px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  flex: 1,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => handleExcluirItem(item.id)}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#cc3333'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#ff4444'}
+              >
+                🗑️ Excluir
+              </button>
+            </div>
           </div>
         ))}
       </div>
