@@ -8,6 +8,7 @@ function Cronometro({ inicio, tempo, status }) {
 
   const mapTempoParaSegundos = (tempoStr) => {
     switch (tempoStr) {
+      case '30 minutos': return 30 * 60;
       case '25 minutos': return 25 * 60;
       case '40 minutos': return 40 * 60;
       case '1 hora': return 60 * 60;
@@ -53,7 +54,7 @@ function Cronometro({ inicio, tempo, status }) {
 
 function Quartos() {
   const [quartos, setQuartos] = useState([]);
-  const [form, setForm] = useState({ nome: '', tempo: '25 minutos', formaPagamento: '', quarto: '' });
+  const [form, setForm] = useState({ nome: '', tempo: '30 minutos', formaPagamento: '', quarto: '' });
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -88,6 +89,7 @@ function Quartos() {
     if (tempo === '1 hora') return 100;
     if (tempo === '1 hora gringo') return 150;
     if (tempo === 'pernoite') return 300;
+    if (tempo === '30 minutos') return 50;
     if (tempo === '25 minutos' || tempo === '40 minutos') return 50;
     return 0;
   };
@@ -176,7 +178,7 @@ function Quartos() {
       const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error('Erro ao criar');
       await carregar();
-      setForm({ nome: '', tempo: '25 minutos', formaPagamento: '', quarto: '' });
+      setForm({ nome: '', tempo: '30 minutos', formaPagamento: '', quarto: '' });
     } catch (err) {
       console.error(err);
       alert('Erro ao criar quarto');
@@ -345,11 +347,8 @@ function Quartos() {
           <div className="form-group">
             <label className="form-label">Tempo</label>
             <select className="form-input" value={form.tempo} onChange={e => setForm({ ...form, tempo: e.target.value })}>
-              <option>25 minutos</option>
-              <option>40 minutos</option>
-              <option>1 hora</option>
+              <option>30 minutos</option>
               <option>1 hora gringo</option>
-              <option>pernoite</option>
             </select>
           </div>
           <div className="form-group">
