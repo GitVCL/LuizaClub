@@ -349,6 +349,7 @@ function Quartos() {
             <select className="form-input" value={form.tempo} onChange={e => setForm({ ...form, tempo: e.target.value })}>
               <option>30 minutos</option>
               <option>1 hora gringo</option>
+              <option>pernoite</option>
             </select>
           </div>
           <div className="form-group">
