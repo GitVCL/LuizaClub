@@ -66,6 +66,8 @@ function Quartos() {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroQuarto, setFiltroQuarto] = useState(''); // eslint-disable-line no-unused-vars
   const [limite] = useState(10); // eslint-disable-line no-unused-vars
+  const [finalizados, setFinalizados] = useState([]);
+  const [finalizadosCarregando, setFinalizadosCarregando] = useState(false);
 
   // Fallback de userId para ambiente de desenvolvimento
   const userId = localStorage.getItem('userId') || 'dev-user';
@@ -114,9 +116,10 @@ function Quartos() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const url = `${API}/${encodeURIComponent(userId)}`;
-      console.log('Carregando quartos de URL:', url);
-      const res = await fetch(url);
+      const url = new URL(`${API}/${encodeURIComponent(userId)}`);
+      url.searchParams.set('status', 'ativo');
+      console.log('Carregando quartos de URL:', url.toString());
+      const res = await fetch(url.toString());
       const contentType = res.headers.get('Content-Type') || '';
       if (!res.ok) {
         let detalhe = '';
@@ -136,7 +139,7 @@ function Quartos() {
             console.warn('Falha ao ler texto de erro do GET /quartos:', e);
           }
         }
-        console.error('Falha ao carregar quartos:', { url, status: res.status, contentType, detalhe });
+        console.error('Falha ao carregar quartos:', { url: url.toString(), status: res.status, contentType, detalhe });
         setErrorMsg(`Falha ao carregar (HTTP ${res.status}). ${detalhe ? 'Detalhe: ' + detalhe : ''}`);
         setQuartos([]);
         return;
@@ -150,6 +153,31 @@ function Quartos() {
       setQuartos([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const carregarFinalizados = async () => {
+    if (!filtroInicio && !filtroFim) {
+      alert('Informe pelo menos uma data (início ou fim) para pesquisar os finalizados.');
+      return;
+    }
+    setFinalizadosCarregando(true);
+    try {
+      const url = new URL(`${API}/${encodeURIComponent(userId)}`);
+      url.searchParams.set('status', 'finalizado');
+      if (filtroInicio) url.searchParams.set('dataInicio', filtroInicio);
+      if (filtroFim) url.searchParams.set('dataFim', filtroFim);
+      if (filtroHoraInicio) url.searchParams.set('horaInicio', filtroHoraInicio);
+      if (filtroHoraFim) url.searchParams.set('horaFim', filtroHoraFim);
+      if (filtroNome.trim()) url.searchParams.set('nome', filtroNome.trim());
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      setFinalizados(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Erro ao carregar quartos finalizados:', err);
+      setFinalizados([]);
+    } finally {
+      setFinalizadosCarregando(false);
     }
   };
 
@@ -311,27 +339,7 @@ function Quartos() {
     printWin.document.close();
   }
 
-  // Filtro por data para itens finalizados
-  const finalizados = quartos.filter(q => q.status === 'finalizado');
-  const porData = (!filtroInicio && !filtroFim) ? finalizados : finalizados.filter(q => {
-    if (!q.encerradoEm) return false;
-    const encerrado = new Date(q.encerradoEm);
-
-    const hInicio = filtroHoraInicio || '00:00';
-    const hFim = filtroHoraFim || '23:59';
-
-    const inicio = filtroInicio ? new Date(`${filtroInicio}T${hInicio}:00`) : null;
-    const fim = filtroFim ? new Date(`${filtroFim}T${hFim}:59`) : null;
-
-    if (inicio && encerrado < inicio) return false;
-    if (fim && encerrado > fim) return false;
-    return true;
-  });
-  const finalizadosFiltrados = (!filtroNome ? porData : porData.filter(q => {
-    const nome = (q.nome || '').toLowerCase();
-    return nome.includes(filtroNome.trim().toLowerCase());
-  }));
-
+  const finalizadosFiltrados = finalizados;
   const totalFaturadoFinalizados = finalizadosFiltrados.reduce((acc, q) => acc + valorDoQuarto(q), 0);
 
   return (
@@ -440,29 +448,27 @@ function Quartos() {
       <div className="card" style={{ marginTop: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ margin: 0 }}>Finalizados</h3>
-          <div>
-            <button className="btn-secondary" onClick={() => setShowFinalizados(v => !v)}>
-              {showFinalizados ? 'Ocultar' : 'Mostrar'}
-            </button>
-            {showFinalizados && (
-              <button className="btn-secondary" style={{ marginLeft: 8 }} onClick={carregar}>
-                Atualizar Lista
-              </button>
-            )}
-          </div>
+          <button className="btn-secondary" onClick={() => {
+            setShowFinalizados(v => !v);
+            if (showFinalizados) {
+              setFinalizados([]);
+            }
+          }}>
+            {showFinalizados ? 'Ocultar' : 'Mostrar'}
+          </button>
         </div>
         {showFinalizados && (
           <>
             <div className="form-grid" style={{ marginTop: 12 }}>
               <div className="form-group">
-                <label className="form-label">Início (Data/Hora)</label>
+                <label className="form-label">Início (Data/Hora) *</label>
                 <div style={{ display: 'flex', gap: '5px' }}>
                   <input type="date" className="form-input" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} />
                   <input type="time" className="form-input" value={filtroHoraInicio} onChange={e => setFiltroHoraInicio(e.target.value)} />
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Fim (Data/Hora)</label>
+                <label className="form-label">Fim (Data/Hora) *</label>
                 <div style={{ display: 'flex', gap: '5px' }}>
                   <input type="date" className="form-input" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} />
                   <input type="time" className="form-input" value={filtroHoraFim} onChange={e => setFiltroHoraFim(e.target.value)} />
@@ -472,29 +478,43 @@ function Quartos() {
                 <label className="form-label">Buscar por Nome</label>
                 <input type="text" className="form-input" placeholder="Ex: Maria" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} />
               </div>
-              <div className="form-group" style={{ alignSelf: 'end' }}>
+              <div className="form-group" style={{ alignSelf: 'end', display: 'flex', gap: '8px' }}>
+                <button className="btn-primary" onClick={carregarFinalizados}>🔍 Buscar</button>
                 <button className="btn-secondary" onClick={() => { 
                   setFiltroInicio(''); 
                   setFiltroHoraInicio('00:00');
                   setFiltroFim(''); 
                   setFiltroHoraFim('23:59');
                   setFiltroNome(''); 
-                }}>Limpar Filtro</button>
+                  setFinalizados([]);
+                }}>Limpar</button>
               </div>
             </div>
 
-            <div style={{ marginTop: 8, color: '#00ff00', fontWeight: 'bold' }}>
-              Total encontrados: {finalizadosFiltrados.length}
-            </div>
-            <div style={{ marginTop: 4, color: '#00ff00', fontWeight: 'bold' }}>
-              Total faturado: R$ {totalFaturadoFinalizados.toFixed(2)}
+            <div style={{ marginTop: 12, padding: '10px 12px', backgroundColor: 'rgba(0, 255, 0, 0.08)', borderRadius: '6px', border: '1px solid rgba(0, 255, 0, 0.3)', color: '#aaa', fontSize: '13px' }}>
+              ⚠️ Informe um período (Data Início e/ou Data Fim) e clique em <strong style={{color:'#00ff00'}}>BUSCAR</strong> para carregar os quartos finalizados do período.
             </div>
 
-            <div className="responsive-grid" style={{ marginTop: 12 }}>
-              {finalizadosFiltrados.length === 0 ? (
-                <div className="card">Nenhum quarto finalizado</div>
-              ) : (
-                finalizadosFiltrados.map((q) => (
+            {finalizadosCarregando ? (
+              <div style={{ marginTop: 12 }}>Carregando...</div>
+            ) : (
+              <>
+                {finalizadosFiltrados.length > 0 && (
+                  <>
+                    <div style={{ marginTop: 8, color: '#00ff00', fontWeight: 'bold' }}>
+                      Total encontrados: {finalizadosFiltrados.length}
+                    </div>
+                    <div style={{ marginTop: 4, color: '#00ff00', fontWeight: 'bold' }}>
+                      Total faturado: R$ {totalFaturadoFinalizados.toFixed(2)}
+                    </div>
+                  </>
+                )}
+
+                <div className="responsive-grid" style={{ marginTop: 12 }}>
+                  {finalizadosFiltrados.length === 0 ? (
+                    <div className="card">Nenhum quarto finalizado encontrado para o período informado.</div>
+                  ) : (
+                    finalizadosFiltrados.map((q) => (
                   <div key={q.id} className="card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
@@ -526,6 +546,8 @@ function Quartos() {
                 ))
               )}
             </div>
+              </>
+            )}
           </>
         )}
       </div>

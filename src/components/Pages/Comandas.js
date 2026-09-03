@@ -49,36 +49,38 @@ const Comandas = () => {
   const carregarComandas = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const res = await fetch(`${API_BASE}/api/comandas/${userId}`);
+      const url = new URL(`${API_BASE}/api/comandas/${userId}`);
+      url.searchParams.set('status', 'aberta');
+      const res = await fetch(url.toString());
       const data = await res.json();
-      setComandas(data.filter(c => c.status !== 'finalizada'));
+      setComandas(data);
     } catch (err) {
       console.error('Erro ao carregar comandas:', err);
     }
   };
 
   const carregarComandasFinalizadas = async () => {
+    if (!filtroInicio && !filtroFim) {
+      alert('Informe pelo menos uma data (início ou fim) para pesquisar os finalizados.');
+      return;
+    }
     setFinalizadosCarregando(true);
     try {
       const userId = localStorage.getItem('userId');
-      const res = await fetch(`${API_BASE}/api/comandas/${userId}`);
+      const url = new URL(`${API_BASE}/api/comandas/${userId}`);
+      url.searchParams.set('status', 'finalizada');
+      if (filtroInicio) url.searchParams.set('dataInicio', filtroInicio);
+      if (filtroFim) url.searchParams.set('dataFim', filtroFim);
+      if (filtroNome.trim()) url.searchParams.set('nome', filtroNome.trim());
+      const res = await fetch(url.toString());
       const data = await res.json();
-      const lista = data
-        .filter(c => c.status === 'finalizada')
-        .sort((a, b) => new Date(b.encerradaEm) - new Date(a.encerradaEm));
-      setComandasFinalizadas(lista);
+      setComandasFinalizadas(data);
     } catch (err) {
       console.error('Erro ao carregar comandas finalizadas:', err);
     } finally {
       setFinalizadosCarregando(false);
     }
   };
-
-  useEffect(() => {
-    if (finalizadosVisivel) {
-      carregarComandasFinalizadas();
-    }
-  }, [finalizadosVisivel]);
 
   const carregarProdutos = async () => {
     try {
@@ -1197,7 +1199,12 @@ const excluirComandaConfirmada = async () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ margin: 0 }}>Finalizados</h3>
-          <button className="btn-secondary" onClick={() => setFinalizadosVisivel(v => !v)}>
+          <button className="btn-secondary" onClick={() => {
+            setFinalizadosVisivel(v => !v);
+            if (finalizadosVisivel) {
+              setComandasFinalizadas([]);
+            }
+          }}>
             {finalizadosVisivel ? 'Ocultar' : 'Mostrar'}
           </button>
         </div>
@@ -1207,20 +1214,25 @@ const excluirComandaConfirmada = async () => {
             {/* Filtros */}
             <div className="form-grid" style={{ marginBottom: 12 }}>
               <div className="form-group">
-                <label className="form-label">Data Início</label>
+                <label className="form-label">Data Início *</label>
                 <input type="date" className="form-input" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} />
               </div>
               <div className="form-group">
-                <label className="form-label">Data Fim</label>
+                <label className="form-label">Data Fim *</label>
                 <input type="date" className="form-input" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} />
               </div>
               <div className="form-group">
                 <label className="form-label">Buscar por Nome</label>
                 <input type="text" className="form-input" placeholder="Ex: Maria" value={filtroNome} onChange={e => setFiltroNome(e.target.value)} />
               </div>
-              <div className="form-group" style={{ alignSelf: 'end' }}>
-                <button className="btn-secondary" onClick={() => { setFiltroInicio(''); setFiltroFim(''); setFiltroNome(''); }}>Limpar Filtro</button>
+              <div className="form-group" style={{ alignSelf: 'end', display: 'flex', gap: '8px' }}>
+                <button className="btn-primary" onClick={carregarComandasFinalizadas}>🔍 Buscar</button>
+                <button className="btn-secondary" onClick={() => { setFiltroInicio(''); setFiltroFim(''); setFiltroNome(''); setComandasFinalizadas([]); }}>Limpar</button>
               </div>
+            </div>
+
+            <div style={{ marginBottom: 12, padding: '10px 12px', backgroundColor: 'rgba(0, 255, 0, 0.08)', borderRadius: '6px', border: '1px solid rgba(0, 255, 0, 0.3)', color: '#aaa', fontSize: '13px' }}>
+              ⚠️ Informe um período (Data Início e/ou Data Fim) e clique em <strong style={{color:'#00ff00'}}>BUSCAR</strong> para carregar as comandas finalizadas do período.
             </div>
 
             {/* Lista */}
@@ -1228,27 +1240,17 @@ const excluirComandaConfirmada = async () => {
               <div>Carregando...</div>
             ) : (
               (() => {
-                const porData = (!filtroInicio && !filtroFim) ? comandasFinalizadas : comandasFinalizadas.filter(c => {
-                  if (!c.encerradaEm) return false;
-                  const encerrado = new Date(c.encerradaEm);
-                  const inicio = filtroInicio ? new Date(`${filtroInicio}T00:00:00`) : null;
-                  const fim = filtroFim ? new Date(`${filtroFim}T23:59:59`) : null;
-                  if (inicio && encerrado < inicio) return false;
-                  if (fim && encerrado > fim) return false;
-                  return true;
-                });
-                const filtrados = (!filtroNome ? porData : porData.filter(c => {
-                  const base = ((c.dono || '') + ' ' + (c.nome || '')).toLowerCase();
-                  return base.includes(filtroNome.trim().toLowerCase());
-                }));
+                const filtrados = comandasFinalizadas;
 
                 return (
                   <>
-                    <div style={{ marginBottom: 8, color: '#00ff00', fontWeight: 'bold' }}>
-                      Total encontrados: {filtrados.length}
-                    </div>
-                    {filtrados.length === 0 ? (
-                      <div className="card">Nenhuma comanda finalizada</div>
+                    {comandasFinalizadas.length > 0 && (
+                      <div style={{ marginBottom: 8, color: '#00ff00', fontWeight: 'bold' }}>
+                        Total encontrados: {filtrados.length}
+                      </div>
+                    )}
+                    {comandasFinalizadas.length === 0 ? (
+                      <div className="card">Nenhuma comanda finalizada encontrada para o período informado.</div>
                     ) : (
                       <div className="responsive-grid">
                         {filtrados.map((c) => {
