@@ -177,8 +177,15 @@ function Quartos() {
       const payload = { ...form, userId };
       const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error('Erro ao criar');
+
+      const quartoCriado = await res.json();
       await carregar();
       setForm({ nome: '', tempo: '30 minutos', formaPagamento: '', quarto: '' });
+
+      // Abre a impressão automaticamente após a criação
+      if (quartoCriado && typeof quartoCriado === 'object' && quartoCriado.id) {
+        imprimirQuarto(quartoCriado);
+      }
     } catch (err) {
       console.error(err);
       alert('Erro ao criar quarto');

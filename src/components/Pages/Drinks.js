@@ -25,7 +25,7 @@ function Drinks() {
   const [form, setForm] = useState({
     funcionaria: '',
     quantidade: 0,
-    meta: 20,
+    meta: 25,
     inicio: '',
     fim: '',
   });
@@ -108,7 +108,7 @@ function Drinks() {
       });
       if (!res.ok) throw new Error('Erro ao criar');
       await carregar();
-      setForm({ funcionaria: '', quantidade: 0, meta: 20, inicio: '', fim: '' });
+      setForm({ funcionaria: '', quantidade: 0, meta: 25, inicio: '', fim: '' });
     } catch (err) {
       console.error(err);
       alert('Erro ao criar registro');

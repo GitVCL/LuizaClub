@@ -26,6 +26,8 @@ function Relatorio() {
   const [horaInicio, setHoraInicio] = useState('00:00');
   const [horaFim, setHoraFim] = useState('23:59');
   const [totalPorPeriodo, setTotalPorPeriodo] = useState(null);
+  const [comandasPorPeriodo, setComandasPorPeriodo] = useState([]);
+  const [relatorioExpandido, setRelatorioExpandido] = useState(null);
   const [topProdutos, setTopProdutos] = useState([]);
 
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#00C49F', '#AA66CC', '#FF8800'];
@@ -147,6 +149,153 @@ function Relatorio() {
     });
   };
 
+  const exportarPDFFinalizada = (comanda) => {
+    if (!comanda) return alert('Comanda não encontrada.');
+    const itensLista = Array.isArray(comanda.itens) ? comanda.itens : [];
+    const totalValor = Number(comanda.total || 0);
+
+    const printWindow = window.open('', '_blank');
+
+    const printHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Comanda - ${comanda.nome}</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 3mm;
+            width: 80mm;
+            max-width: 80mm;
+            font-size: 12px;
+            text-align: center;
+            color: black;
+            background: white;
+          }
+          .nota-container {
+            width: 80mm;
+            max-width: 300px;
+            margin: 0 auto;
+          }
+          h3 {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+          }
+          p {
+            font-size: 10px;
+            margin-bottom: 8px;
+            text-align: center;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+            font-size: 14px;
+          }
+          th, td {
+            padding: 2px 3px;
+            font-size: 14px;
+            line-height: 1.2;
+            border: none;
+          }
+          th:first-child, td:first-child {
+            text-align: left;
+            width: 40%;
+          }
+          th:nth-child(2), td:nth-child(2) {
+            text-align: center;
+            width: 15%;
+          }
+          th:nth-child(3), td:nth-child(3) {
+            text-align: right;
+            width: 20%;
+          }
+          th:last-child, td:last-child {
+            text-align: right;
+            width: 25%;
+          }
+          th {
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+          }
+          .total {
+            margin-top: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: left;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            width: 100%;
+            display: block;
+          }
+          .info-line {
+            font-size: 10px;
+            margin-bottom: 4px;
+            text-align: left;
+            border-top: 1px dashed #000;
+            padding-top: 4px;
+            margin-top: 6px;
+          }
+          .footer {
+            font-size: 8px;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+          }
+          @media print {
+            body { margin: 0; }
+            .nota-container { width: 100%; max-width: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="nota-container">
+           <h3>${comanda.nome}</h3>
+           ${comanda.dono ? `<p><strong>Dono:</strong> ${comanda.dono}</p>` : ''}
+           ${comanda.encerradaEm ? `<p><strong>Encerrada:</strong> ${new Date(comanda.encerradaEm).toLocaleString()}</p>` : ''}
+          <table>
+            <thead>
+              <tr>
+                <th>Desc</th>
+                <th>Qtd</th>
+                <th>V. Unit</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itensLista.map(item => `
+                <tr>
+                  <td>${item?.descricao || 'Item'}</td>
+                  <td style="text-align: center">${item?.qtd || 0}</td>
+                  <td style="text-align: right">R$ ${Number(item?.valorUnit || 0).toFixed(2)}</td>
+                  <td style="text-align: right">R$ ${((Number(item?.valorUnit || 0)) * (Number(item?.qtd || 0))).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="total">Total: R$ ${totalValor.toFixed(2)}</div>
+          ${itensLista.some(i => i?.comissionado) ? '<div class="info-line">* COM = Item comissionado</div>' : ''}
+          <div class="footer">Obrigado pela preferência!</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(printHTML);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  };
+
   const buscarFinalizadosPorPeriodo = async () => {
     try {
       const inicio = new Date(dataInicio + "T" + horaInicio + ":00");
@@ -157,9 +306,12 @@ function Relatorio() {
 
       const total = data.reduce((acc, item) => acc + Number(item.total || 0), 0);
       setTotalPorPeriodo(total);
+      setComandasPorPeriodo(Array.isArray(data) ? data : []);
+      setRelatorioExpandido(null);
     } catch (err) {
       console.error('Erro ao buscar finalizados por período:', err);
       setTotalPorPeriodo(null);
+      setComandasPorPeriodo([]);
     }
   };
 
@@ -517,18 +669,147 @@ function Relatorio() {
         </div>
         
         {totalPorPeriodo !== null && (
-          <div style={{
-            marginTop: '20px',
-            padding: '15px',
-            backgroundColor: 'rgba(0, 255, 0, 0.1)',
-            border: '1px solid #00ff00',
-            borderRadius: '8px',
-            textAlign: 'center'
-          }}>
-            <h4 style={{ color: '#00ff00', margin: 0 }}>
-              Período Selecionado: R$ {totalPorPeriodo.toFixed(2)}
-            </h4>
-          </div>
+          <>
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              border: '1px solid #00ff00',
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <h4 style={{ color: '#00ff00', margin: 0, fontSize: '18px' }}>
+                Período Selecionado: R$ {totalPorPeriodo.toFixed(2)}
+              </h4>
+              <p style={{ color: 'white', margin: '8px 0 0', fontSize: '14px' }}>
+                {comandasPorPeriodo.length} comanda(s) finalizada(s) no período
+              </p>
+            </div>
+
+            {comandasPorPeriodo.length > 0 && (
+              <div style={{ marginTop: '20px' }}>
+                <h4 style={{ color: '#00ff00', marginBottom: '12px', fontSize: '16px' }}>
+                  Detalhamento por Comanda
+                </h4>
+                <div className="responsive-grid">
+                  {comandasPorPeriodo.map((c) => {
+                    const isExpanded = relatorioExpandido === c.id;
+                    const itensLista = Array.isArray(c.itens) ? c.itens : [];
+
+                    return (
+                      <div key={c.id} className="card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <h5 style={{ margin: 0, color: 'white' }}>{c.nome}</h5>
+                            {c.dono && (
+                              <p style={{ margin: 0, color: '#aaa', fontSize: '13px' }}>Dono: {c.dono}</p>
+                            )}
+                          </div>
+                          <span style={{
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            fontSize: '11px',
+                            padding: '3px 8px',
+                            borderRadius: '10px'
+                          }}>
+                            finalizada
+                          </span>
+                        </div>
+
+                        <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                          <div>
+                            <p style={{ margin: 0 }}>Itens: <strong>{itensLista.length}</strong></p>
+                            <p style={{ margin: 0 }}>Total: <strong style={{ color: '#00ff00' }}>R$ {(c.total || 0).toFixed(2)}</strong></p>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <p style={{ margin: 0, color: '#aaa' }}>Encerrada:</p>
+                            <p style={{ margin: 0, fontWeight: 'bold' }}>{new Date(c.encerradaEm).toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: '8px 10px', fontSize: '12px' }}
+                            onClick={() => setRelatorioExpandido(isExpanded ? null : c.id)}
+                          >
+                            {isExpanded ? '▲ Ocultar' : '▼ Ver Itens'}
+                          </button>
+                          <button
+                            onClick={() => exportarPDFFinalizada(c)}
+                            style={{
+                              padding: '8px 10px',
+                              backgroundColor: '#6f42c1',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => { e.target.style.backgroundColor = '#5a32a3'; }}
+                            onMouseLeave={(e) => { e.target.style.backgroundColor = '#6f42c1'; }}
+                          >
+                            🖨 Imprimir
+                          </button>
+                        </div>
+
+                        {isExpanded && (
+                          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(0, 255, 0, 0.3)' }}>
+                            <div style={{
+                              overflowX: 'auto',
+                              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(0, 255, 0, 0.2)'
+                            }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                                <thead>
+                                  <tr style={{ backgroundColor: 'rgba(0, 255, 0, 0.08)' }}>
+                                    <th style={{ padding: '6px 8px', color: '#00ff00', fontWeight: 'bold', textAlign: 'left', borderBottom: '1px solid rgba(0, 255, 0, 0.3)' }}>Descrição</th>
+                                    <th style={{ padding: '6px 8px', color: '#00ff00', fontWeight: 'bold', textAlign: 'center', borderBottom: '1px solid rgba(0, 255, 0, 0.3)' }}>Qtd</th>
+                                    <th style={{ padding: '6px 8px', color: '#00ff00', fontWeight: 'bold', textAlign: 'right', borderBottom: '1px solid rgba(0, 255, 0, 0.3)' }}>Unit</th>
+                                    <th style={{ padding: '6px 8px', color: '#00ff00', fontWeight: 'bold', textAlign: 'right', borderBottom: '1px solid rgba(0, 255, 0, 0.3)' }}>Sub</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {itensLista.length === 0 ? (
+                                    <tr>
+                                      <td colSpan="4" style={{ padding: '12px', color: '#888', textAlign: 'center' }}>
+                                        Sem itens
+                                      </td>
+                                    </tr>
+                                  ) : (
+                                    itensLista.map((item, idx) => {
+                                      const unit = Number(item?.valorUnit || 0);
+                                      const qtd = Number(item?.qtd || 0);
+                                      return (
+                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(0, 255, 0, 0.1)' }}>
+                                          <td style={{ padding: '6px 8px', color: 'white' }}>
+                                            {item?.descricao || 'Item'}
+                                            {item?.comissionado && (
+                                              <span style={{ fontSize: '9px', backgroundColor: '#ffc107', color: '#000', padding: '1px 4px', borderRadius: '3px', marginLeft: '4px' }}>COM</span>
+                                            )}
+                                          </td>
+                                          <td style={{ padding: '6px 8px', color: 'white', textAlign: 'center' }}>{qtd}</td>
+                                          <td style={{ padding: '6px 8px', color: 'white', textAlign: 'right' }}>{unit.toFixed(2)}</td>
+                                          <td style={{ padding: '6px 8px', color: '#00ff00', fontWeight: 'bold', textAlign: 'right' }}>{(unit * qtd).toFixed(2)}</td>
+                                        </tr>
+                                      );
+                                    })
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </ResponsiveLayout>
