@@ -297,6 +297,10 @@ function Relatorio() {
   };
 
   const buscarFinalizadosPorPeriodo = async () => {
+    const senha = prompt('Digite a senha para buscar finalizados por período:');
+    if (senha !== '202030') {
+      return;
+    }
     try {
       const inicio = new Date(dataInicio + "T" + horaInicio + ":00");
       const fim = new Date(dataFim + "T" + horaFim + ":59");
@@ -337,7 +341,7 @@ function Relatorio() {
             onClick={() => {
               if (!mostrarTotais) {
                 const senha = prompt('Digite a senha para visualizar os valores:');
-                if (senha === 'admin123') {
+                if (senha === '202030') {
                   setMostrarTotais(true);
                 }
               } else {
@@ -397,7 +401,7 @@ function Relatorio() {
             onClick={() => {
               if (!mostrarTotaisQuartos) {
                 const senha = prompt('Digite a senha para visualizar os valores:');
-                if (senha === 'admin123') {
+                if (senha === '202030') {
                   setMostrarTotaisQuartos(true);
                 }
               } else {

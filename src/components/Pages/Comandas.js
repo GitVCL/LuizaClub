@@ -4,6 +4,7 @@ import '../GlobalLayout.css';
 import ProductSearch from '../ProductSearch';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const SENHA_CANCELAMENTO = '202030';
 
 const Comandas = () => {
   const [comandas, setComandas] = useState([]);
@@ -13,6 +14,11 @@ const Comandas = () => {
   const [dono, setDono] = useState('');
   const [criando, setCriando] = useState(false);
   const [numeroComanda, setNumeroComanda] = useState('');
+  const [garcom, setGarcom] = useState('');
+  const [donoNovo, setDonoNovo] = useState('');
+  const [senhaModal, setSenhaModal] = useState(null);
+  const [senhaInput, setSenhaInput] = useState('');
+  const [senhaErro, setSenhaErro] = useState('');
   const [produtos, setProdutos] = useState([]);
   const [modalExcluir, setModalExcluir] = useState(false);
   const [finalizadosVisivel, setFinalizadosVisivel] = useState(false);
@@ -94,13 +100,14 @@ const Comandas = () => {
     }
   };
 
-  const criarComanda = async (numero) => {
+  const criarComanda = async (numero, garcomNome, donoNome) => {
     const userId = localStorage.getItem('userId');
     const nova = {
       nome: `Comanda #${numero}`,
       itens: [],
       total: 0,
-      dono: '',
+      dono: donoNome || '',
+      garcom: garcomNome || '',
       userId,
       status: 'aberta',
       criadaEm: new Date()
@@ -232,7 +239,19 @@ const Comandas = () => {
     salvarComandaNoBanco(comAtualizada);
   };
 
-  const removerQuantidade = (idx) => {
+  const removerQuantidade = (idx) => solicitarCancelamento('qtd', idx);
+
+  const removerItem = (idx) => solicitarCancelamento('item', idx);
+
+  // Abre o modal de senha para cancelar/reduzir um produto
+  const solicitarCancelamento = (tipo, idx) => {
+    setSenhaInput('');
+    setSenhaErro('');
+    setSenhaModal({ tipo, idx });
+  };
+
+  // Reduz a quantidade do item (senha já validada)
+  const executarRemocaoQuantidade = (idx) => {
     const novosItens = [...itens];
     if (novosItens[idx].qtd > 1) {
       novosItens[idx].qtd -= 1;
@@ -244,11 +263,12 @@ const Comandas = () => {
       setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
       salvarComandaNoBanco(comAtualizada);
     } else {
-      removerItem(idx);
+      executarRemocaoItem(idx);
     }
   };
 
-  const removerItem = (idx) => {
+  // Remove o item inteiro (senha já validada)
+  const executarRemocaoItem = (idx) => {
     const itemRemovido = itens[idx];
     const novosItens = itens.filter((_, i) => i !== idx);
     const novoTotal = valorTotal - (itemRemovido.valorUnit * itemRemovido.qtd);
@@ -258,6 +278,24 @@ const Comandas = () => {
     setComandaAberta(comAtualizada);
     setComandas(comandas.map(c => c.id === comAtualizada.id ? comAtualizada : c));
     salvarComandaNoBanco(comAtualizada);
+  };
+
+  const validarSenhaCancelamento = () => {
+    if (senhaInput !== SENHA_CANCELAMENTO) {
+      setSenhaErro('Senha incorreta. Tente novamente.');
+      setSenhaInput('');
+      return;
+    }
+    const acao = senhaModal;
+    setSenhaModal(null);
+    setSenhaInput('');
+    setSenhaErro('');
+    if (!acao) return;
+    if (acao.tipo === 'qtd') {
+      executarRemocaoQuantidade(acao.idx);
+    } else {
+      executarRemocaoItem(acao.idx);
+    }
   };
 
   const adicionar10PorCento = () => {
@@ -699,13 +737,51 @@ const excluirComandaConfirmada = async () => {
                 minWidth: '120px'
               }}
             />
+            <label style={{ color: '#00ff00', fontWeight: 'bold' }}>
+              NOME DO GARÇOM:
+            </label>
+            <input
+              type="text"
+              value={garcom}
+              onChange={(e) => setGarcom(e.target.value)}
+              placeholder="Ex: João"
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '2px solid #00ff00',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                color: '#00ff00',
+                minWidth: '160px'
+              }}
+            />
+            <label style={{ color: '#00ff00', fontWeight: 'bold' }}>
+              DONO (CLIENTE):
+            </label>
+            <input
+              type="text"
+              value={donoNovo}
+              onChange={(e) => setDonoNovo(e.target.value)}
+              placeholder="Ex: Cliente (opcional)"
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '2px solid #00ff00',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                color: '#00ff00',
+                minWidth: '160px'
+              }}
+            />
             <button 
               className="btn-primary"
               onClick={() => {
-                if (numeroComanda.trim() !== '') {
-                  criarComanda(numeroComanda);
+                if (numeroComanda.trim() !== '' && garcom.trim() !== '') {
+                  criarComanda(numeroComanda, garcom.trim(), donoNovo.trim());
                   setNumeroComanda('');
+                  setGarcom('');
+                  setDonoNovo('');
                   setCriando(false);
+                } else {
+                  alert('Informe o número da comanda e o nome do garçom.');
                 }
               }}
             >
@@ -713,7 +789,12 @@ const excluirComandaConfirmada = async () => {
             </button>
             <button 
               className="btn-secondary"
-              onClick={() => setCriando(false)}
+              onClick={() => {
+                setCriando(false);
+                setNumeroComanda('');
+                setGarcom('');
+                setDonoNovo('');
+              }}
             >
               Cancelar
             </button>
@@ -745,6 +826,13 @@ const excluirComandaConfirmada = async () => {
               color: 'white'
             }}>
               <strong>Dono:</strong> {c.dono || '---'}
+            </p>
+            <p style={{ 
+              fontSize: '16px', 
+              marginBottom: '15px',
+              color: 'white'
+            }}>
+              <strong>Garçom:</strong> {c.garcom || '---'}
             </p>
             <button 
               className="btn-primary"
@@ -778,14 +866,26 @@ const excluirComandaConfirmada = async () => {
               paddingBottom: '15px',
               borderBottom: '2px solid #00ff00'
             }}>
-              <h2 style={{ 
-                margin: 0, 
-                color: '#00ff00', 
-                fontSize: 'clamp(20px, 4vw, 28px)',
-                fontWeight: 'bold'
-              }}>
-                {comandaAberta.nome}
-              </h2>
+              <div>
+                <h2 style={{ 
+                  margin: 0, 
+                  color: '#00ff00', 
+                  fontSize: 'clamp(20px, 4vw, 28px)',
+                  fontWeight: 'bold'
+                }}>
+                  {comandaAberta.nome}
+                </h2>
+                {comandaAberta.garcom && (
+                  <div style={{ color: '#ffc107', fontSize: '14px', marginTop: '4px' }}>
+                    Garçom: {comandaAberta.garcom}
+                  </div>
+                )}
+                {comandaAberta.dono && (
+                  <div style={{ color: '#ffc107', fontSize: '14px', marginTop: '2px' }}>
+                    Dono: {comandaAberta.dono}
+                  </div>
+                )}
+              </div>
               <button 
                 onClick={fecharComanda}
                 style={{
@@ -1529,6 +1629,102 @@ const excluirComandaConfirmada = async () => {
             >
               Cancelar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Senha para cancelar/reduzir produto */}
+      {senhaModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 2100,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#1a1a1a',
+            border: '2px solid #00ff00',
+            borderRadius: '15px',
+            padding: '30px',
+            width: '100%',
+            maxWidth: '420px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(0, 255, 0, 0.2)'
+          }}>
+            <h2 style={{ color: '#00ff00', marginBottom: '15px', fontSize: '22px' }}>
+              🔒 Senha necessária
+            </h2>
+            <p style={{ color: 'white', marginBottom: '20px', fontSize: '15px' }}>
+              Informe a senha para {senhaModal.tipo === 'qtd' ? 'reduzir a quantidade' : 'cancelar o produto'}:
+            </p>
+            <input
+              type="password"
+              inputMode="numeric"
+              autoFocus
+              value={senhaInput}
+              onChange={(e) => setSenhaInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') validarSenhaCancelamento();
+              }}
+              placeholder="Senha"
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '2px solid #00ff00',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                color: '#00ff00',
+                fontSize: '18px',
+                textAlign: 'center',
+                letterSpacing: '4px'
+              }}
+            />
+            {senhaErro && (
+              <div style={{ color: '#ff5c5c', marginTop: '10px', fontSize: '13px' }}>
+                {senhaErro}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '25px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={validarSenhaCancelamento}
+                style={{
+                  padding: '12px 30px',
+                  backgroundColor: '#00ff00',
+                  border: 'none',
+                  color: '#000',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
+              >
+                Confirmar
+              </button>
+              <button
+                onClick={() => {
+                  setSenhaModal(null);
+                  setSenhaInput('');
+                  setSenhaErro('');
+                }}
+                style={{
+                  padding: '12px 30px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #ff4444',
+                  color: '#ff4444',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
