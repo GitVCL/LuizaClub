@@ -199,6 +199,17 @@ function Drinks() {
     editarRegistro(drink.id, 'itens', itens);
   }
 
+  function togglePgCasa(drink) {
+    const itens = Array.isArray(drink.itens) ? [...drink.itens] : [];
+    const idx = itens.findIndex((i) => i.descricao === 'pg casa');
+    if (idx >= 0) {
+      itens.splice(idx, 1); // OFF
+    } else {
+      itens.push({ descricao: 'pg casa', qtd: 1, valorUnit: 0 }); // OK
+    }
+    editarRegistro(drink.id, 'itens', itens);
+  }
+
   function adicionarQtdItem(drink, idx) {
     const itens = Array.isArray(drink.itens) ? [...drink.itens] : [];
     itens[idx].qtd += 1;
@@ -235,6 +246,11 @@ function Drinks() {
 
   function bonusPetiscoValor(drink) {
     return countBonusPetisco(drink) * 20; // R$20 por bônus
+  }
+
+  function temPgCasa(drink) {
+    const itens = Array.isArray(drink.itens) ? drink.itens : [];
+    return itens.some((i) => i.descricao === 'pg casa');
   }
 
   function saldoLiquido(drink) {
@@ -398,6 +414,9 @@ function Drinks() {
                 <span style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid #00ff00', color: '#00ff00', padding: '6px 10px', borderRadius: 8 }}>
                   Bônus: <strong>{countBonusPetisco(drinkAberta)}</strong>
                 </span>
+                <span style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid #00ff00', color: '#00ff00', padding: '6px 10px', borderRadius: 8 }}>
+                  PG CASA: <strong>{temPgCasa(drinkAberta) ? 'OK' : 'OFF'}</strong>
+                </span>
                 <span style={{ background: 'rgba(0,255,0,0.06)', border: '1px solid #00ff00', color: saldoLiquido(drinkAberta) >= 0 ? '#00ff00' : '#ff5c5c', padding: '6px 10px', borderRadius: 8 }}>
                   Saldo: <strong>R$ {saldoLiquido(drinkAberta).toFixed(2)}</strong>
                 </span>
@@ -437,6 +456,20 @@ function Drinks() {
                     <span style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>{countBonusPetisco(drinkAberta)}</span>
                     <button className="btn-primary" onClick={() => addBonusPetisco(drinkAberta)}>+1</button>
                     <button className="btn-secondary" onClick={() => removeBonusPetisco(drinkAberta)}>-1</button>
+                  </div>
+                </div>
+                <div style={{ border: '1px solid rgba(0,255,0,0.25)', borderRadius: 12, padding: 12, background: 'rgba(0,255,0,0.06)' }}>
+                  <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: 8 }}>PG CASA</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: temPgCasa(drinkAberta) ? '#00ff00' : '#ff5c5c', fontSize: 20, fontWeight: 'bold' }}>
+                      {temPgCasa(drinkAberta) ? 'OK' : 'OFF'}
+                    </span>
+                    <button
+                      className={temPgCasa(drinkAberta) ? 'btn-secondary' : 'btn-primary'}
+                      onClick={() => togglePgCasa(drinkAberta)}
+                    >
+                      {temPgCasa(drinkAberta) ? 'Desativar' : 'Ativar'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -480,7 +513,7 @@ function Drinks() {
                   {(Array.isArray(drinkAberta.itens)
                     ? drinkAberta.itens
                         .map((item, idx) => ({ item, idx }))
-                        .filter(({ item }) => item.descricao !== 'bonus petisco')
+                        .filter(({ item }) => item.descricao !== 'bonus petisco' && item.descricao !== 'pg casa')
                     : []
                   ).map(({ item, idx }) => (
                     <div key={idx} className="card fade-in" style={{ borderColor: 'rgba(0,255,0,0.3)' }}>

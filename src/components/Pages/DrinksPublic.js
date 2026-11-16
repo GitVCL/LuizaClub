@@ -26,6 +26,11 @@ function bonusPetiscoValor(drink) {
   return countBonusPetisco(drink) * 20;
 }
 
+function temPgCasa(drink) {
+  const itens = Array.isArray(drink.itens) ? drink.itens : [];
+  return itens.some((i) => i.descricao === 'pg casa');
+}
+
 function totalConsumo(drink) {
   const itens = Array.isArray(drink.itens) ? drink.itens : [];
   return itens.reduce((acc, i) => acc + (Number(i.qtd || 0) * Number(i.valorUnit || 0)), 0);
@@ -139,10 +144,11 @@ function DrinksPublic() {
           {filtrada.map((d) => {
             const qtdBonus = countBonusPetisco(d);
             const valorBonus = bonusPetiscoValor(d);
+            const qtdPgCasa = temPgCasa(d) ? 'OK' : 'OFF';
             const consumo = totalConsumo(d);
             const saldo = saldoLiquido(d);
             const itensConsumo = (Array.isArray(d.itens)
-              ? d.itens.filter((i) => i.descricao !== 'bonus petisco')
+              ? d.itens.filter((i) => i.descricao !== 'bonus petisco' && i.descricao !== 'pg casa')
               : []);
             const progresso = Math.min(100, Math.round(((d.quantidade || 0) / Math.max(1, d.meta || 20)) * 100));
 
@@ -200,6 +206,27 @@ function DrinksPublic() {
                   <div style={{ marginTop: 4, fontSize: 12, color: '#aaa' }}>
                     Valor: <span style={{ color: '#ffc107', fontWeight: 'bold' }}>R$ {valorBonus.toFixed(2)}</span>
                     <span style={{ color: '#666', marginLeft: 6 }}>(R$ 20/unidade)</span>
+                  </div>
+                </div>
+
+                {/* ============ BLOCO: PG CASA ============ */}
+                <div style={{
+                  marginTop: 12,
+                  padding: '10px 12px',
+                  backgroundColor: 'rgba(79, 195, 247, 0.08)',
+                  border: '1px solid rgba(79, 195, 247, 0.35)',
+                  borderRadius: 8
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ color: '#4fc3f7', fontWeight: 'bold', fontSize: 13 }}>
+                      🏠 PG CASA
+                    </div>
+                    <div style={{ color: qtdPgCasa === 'OK' ? '#4fc3f7' : '#ff5c5c', fontWeight: 'bold', fontSize: 16 }}>
+                      {qtdPgCasa}
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                    Informativo (não altera o saldo)
                   </div>
                 </div>
 

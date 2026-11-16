@@ -301,7 +301,11 @@ const handleSelectGirlForCommission = async (girl) => {
       if (itemExistente) {
         novosItens = itens.map(item =>
           item.descricao === descricaoFinal
-            ? { ...item, qtd: item.qtd + 1 }
+            ? {
+                ...item,
+                qtd: item.qtd + 1,
+                bebedores: [...(Array.isArray(item.bebedores) ? item.bebedores : []), girl.funcionaria]
+              }
             : item
         );
       } else {
@@ -309,7 +313,8 @@ const handleSelectGirlForCommission = async (girl) => {
           descricao: descricaoFinal,
           qtd: 1,
           valorUnit: pendingCommissionItem.valorUnit,
-          comissionado: true
+          comissionado: true,
+          bebedores: [girl.funcionaria]
         }];
       }
 
@@ -881,6 +886,11 @@ const excluirComandaConfirmada = async () => {
                         fontSize: '16px'
                       }}>
                         {item.descricao}
+                        {Array.isArray(item.bebedores) && item.bebedores.length > 0 && (
+                          <div style={{ color: '#ffc107', fontSize: '13px', fontWeight: 'normal', marginTop: '4px' }}>
+                            🍸 {item.bebedores.join(', ')}
+                          </div>
+                        )}
                       </div>
                       <div style={{
                         display: 'grid',
@@ -1016,6 +1026,11 @@ const excluirComandaConfirmada = async () => {
                           fontWeight: '500'
                         }}>
                           {item.descricao}
+                          {Array.isArray(item.bebedores) && item.bebedores.length > 0 && (
+                            <div style={{ color: '#ffc107', fontSize: '12px', fontWeight: 'normal', marginTop: '2px' }}>
+                              🍸 {item.bebedores.join(', ')}
+                            </div>
+                          )}
                         </td>
                         <td style={{ 
                           padding: '12px 8px', 
@@ -1333,6 +1348,11 @@ const excluirComandaConfirmada = async () => {
                                                 {item?.comissionado && (
                                                   <span style={{ fontSize: '10px', backgroundColor: '#ffc107', color: '#000', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px' }}>COM</span>
                                                 )}
+                                                {Array.isArray(item?.bebedores) && item.bebedores.length > 0 && (
+                                                  <div style={{ color: '#ffc107', fontSize: '12px', fontWeight: 'normal', marginTop: '2px' }}>
+                                                    🍸 {item.bebedores.join(', ')}
+                                                  </div>
+                                                )}
                                               </div>
                                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', color: 'white', fontSize: '13px' }}>
                                                 <div><strong>Qtd:</strong> {item?.qtd || 0}</div>
@@ -1372,6 +1392,11 @@ const excluirComandaConfirmada = async () => {
                                                     {item?.descricao || 'Item'}
                                                     {item?.comissionado && (
                                                       <span style={{ fontSize: '10px', backgroundColor: '#ffc107', color: '#000', padding: '1px 5px', borderRadius: '3px', marginLeft: '6px' }}>COM</span>
+                                                    )}
+                                                    {Array.isArray(item?.bebedores) && item.bebedores.length > 0 && (
+                                                      <div style={{ color: '#ffc107', fontSize: '12px', fontWeight: 'normal', marginTop: '2px' }}>
+                                                        🍸 {item.bebedores.join(', ')}
+                                                      </div>
                                                     )}
                                                   </td>
                                                   <td style={{ padding: '8px 10px', color: 'white', textAlign: 'center' }}>{qtd}</td>
